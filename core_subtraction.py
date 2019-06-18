@@ -55,7 +55,7 @@ def get_position(df, cat_dir):
 
 
 def nearest_point_source(df, position, s_code='S', flux_threshold=0.01,
-                         distance_threshold=0.6, elongation_threshold=1.2):
+                         distance_threshold=1.0, elongation_threshold=1.2):
     '''Find the nearest bright point source to a given blazar.'''
     pd.options.mode.chained_assignment = None  # disable warning, see https://stackoverflow.com/a/20627316/6386612
     df.reset_index(inplace=True)  # remove Source_id as index column
@@ -201,14 +201,13 @@ def diffuse_fraction(df, name, blazar, diffuse, threshold):
     print('{0:.2%} of the emission is not from the core.'.format(fraction))
     results = {'total': blazar_catalogue * 1000, 'core': blazar_core_catalogue * 1000, 'diffuse': blazar_diffuse_catalogue * 1000}  # mJy
     print('The total flux density is {total:.2f} mJy, with the core contributing {core:.2f} mJy and the diffuse emission contributing {diffuse:.2f} mJy.'.format(**results))
-    print('=', name+',', fraction)
 
 
 def make_plot(position, data, title, rows=2, columns=7, origin='lower',
               vmin=0, vmax=1, zmin=0, zmax=1, axis='off', elev=24, azim=29,
               linewidth=0.25, pane_colour='white', line_colour='black',
               cmap='magma_r', projection='3d', stretch='arcsinh', levels='',
-              plot='', layer='', contour_colours=['black', 'magenta'], pad=0.05,
+              plot='', layer='', contour_colours=['blue', 'magenta'], pad=0.05,
               size='5%', orientation='horizontal', location='bottom',
               linestyles='dashed'):
     '''Plot the image on a grid.'''
@@ -256,13 +255,13 @@ def main():
     formatter_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=formatter_class)
     # parser.add_argument('-i', '--image', required=False, type=str, default='/mnt/closet/ldr2-blazars/deep-fields/bootes-image.fits', help='FITS image of the field')
-    parser.add_argument('-c', '--catalogue', required=False, type=str, default='/mnt/closet/deep-fields/catalogues', help='Directory with the catalogues')
+    parser.add_argument('-c', '--catalogue_dir', required=False, type=str, default='/mnt/closet/deep-fields/catalogues', help='Directory with the catalogues')
     parser.add_argument('-d', '--csv', required=False, type=str, default='/mnt/closet/deep-fields/catalogues/deep.fields.11.06.2019.cat.csv', help='CSV catalogue of the blazars')
     parser.add_argument('-o', '--output', required=False, type=str, default='/mnt/closet/deep-fields/images/core-subtract', help='Directory to save the plots')
 
     args = parser.parse_args()
     # image = args.image
-    catalogue = args.catalogue
+    catalogue_dir = args.catalogue_dir
     csv = args.csv
     output = args.output
 
@@ -274,48 +273,48 @@ def main():
     testing = True
     new_size = 10
 
-
     df_blazars = get_df(csv, format='csv', index='Source name')
-    blazar_names, blazar_positions, cats, imgs = get_position(df_blazars, cat_dir=catalogue)
-    for i, (blazar_name, blazar_position, cat) in enumerate(zip(blazar_names, blazar_positions, cats)):
+    blazar_names, blazar_positions, catalogues, images = get_position(df_blazars, cat_dir=catalogue_dir)
+    for i, (blazar_name, blazar_position, catalogue, image) in enumerate(zip(blazar_names, blazar_positions, catalogues, images)):
         if testing:
             if i != 0:  # do one at a time
-                print('one')
                 sys.exit()
-        print('Analysing {} (blazar {} of {}).'.format(blazar_name, i + 1, len(blazar_names)))
-        df_bootes = get_df(cat, format='fits', index='Source_id')
-    #     point_source_id, point_source_position = nearest_point_source(df_bootes, blazar_position)
-    #     hdu, wcs = get_fits(filename=image)
-    #     blazar_data = get_data(position=blazar_position, hdu=hdu, wcs=wcs)
-    #     blazar_data = housekeeping(blazar_name, blazar_data)
-    #     point_source_data = get_data(position=point_source_position, hdu=hdu, wcs=wcs)
-    #     blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)  # peak and total values change with regridding
-    #     point_source_regrid = regrid(point_source_data, new_size=new_size, normalise=False)
-    #     model = make_model(point_source_regrid, sigma_x=4, sigma_y=4)
-    #     point_source_residual = point_source_regrid - model
-    #     scaled_model = (model * np.max(blazar_regrid) / np.max(point_source_regrid))
-    #     blazar_shifted = match_peaks(blazar_regrid, scaled_model)
-    #     blazar_residual = blazar_shifted - scaled_model
-    #     blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
-    #     blazar_residual_regrid_back = regrid(blazar_residual, new_size=1 / new_size, normalise=False)
-    #     five_sigma = get_noise_catalogue(df_blazars, blazar_name)
-    #     diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
-    #     savefig = output + '/' + blazar_name + '.png'
-    #     matplotlib.rcParams['font.family'] = font
-    #     matplotlib.rcParams['mathtext.fontset'] = math_font
-    #     matplotlib.rcParams['font.size'] = font_size
-    #     plt.figure(figsize=figsize)
-    #     make_plot(position=1, data=point_source_regrid, title=point_source_id, vmax=np.max(point_source_regrid))
-    #     make_plot(position=2, data=model, title=point_source_id + ' model', vmax=np.max(point_source_regrid))
-    #     make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual', vmax=np.max(point_source_regrid))
-    #     make_plot(position=4, data=blazar_shifted, title=blazar_name, vmax=np.max(blazar_shifted))
-    #     make_plot(position=5, data=blazar_residual, title=blazar_name + ' diffuse', vmax=np.max(blazar_shifted))
-    #     make_plot(position=6, data=blazar_regrid_back, title=blazar_name, levels=five_sigma, plot='blazar', vmax=np.max(blazar_regrid_back))
-    #     make_plot(position=7, data=blazar_residual_regrid_back, title=blazar_name + ' diffuse', levels=five_sigma, plot='diffuse', layer=blazar_regrid_back, vmax=np.max(blazar_regrid_back))
-    #     if testing:
-    #         plt.show()
-    #     else:
-    #         plt.savefig(savefig, bbox_inches=bbox_inches)
+        print(f'Analysing {blazar_name} which is in {image} (blazar {i + 1} of {len(blazar_names)}).')
+        df_cat = get_df(catalogue, format='fits', index='Source_id')
+        point_source_id, point_source_position = nearest_point_source(df_cat, blazar_position)
+        hdu, wcs = get_fits(filename=image)
+        blazar_data = get_data(position=blazar_position, hdu=hdu, wcs=wcs)
+        blazar_data = housekeeping(blazar_name, blazar_data)
+        point_source_data = get_data(position=point_source_position, hdu=hdu, wcs=wcs)
+        blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)  # peak and total values change with regridding
+        point_source_regrid = regrid(point_source_data, new_size=new_size, normalise=False)
+        model = make_model(point_source_regrid, sigma_x=4, sigma_y=4)
+        point_source_residual = point_source_regrid - model
+        scaled_model = (model * np.max(blazar_regrid) / np.max(point_source_regrid))
+        blazar_shifted = match_peaks(blazar_regrid, scaled_model)
+        blazar_residual = blazar_shifted - scaled_model
+        blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
+        blazar_residual_regrid_back = regrid(blazar_residual, new_size=1 / new_size, normalise=False)
+        five_sigma = get_noise_catalogue(df_blazars, blazar_name)
+        diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
+        savefig = output + '/' + blazar_name + '.png'
+        matplotlib.rcParams['font.family'] = font
+        matplotlib.rcParams['mathtext.fontset'] = math_font
+        matplotlib.rcParams['font.size'] = font_size
+        plt.figure(figsize=figsize)
+        make_plot(position=1, data=point_source_regrid, title=point_source_id, vmax=np.max(point_source_regrid))
+        make_plot(position=2, data=model, title=point_source_id + ' model', vmax=np.max(point_source_regrid))
+        make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual', vmax=np.max(point_source_regrid))
+        make_plot(position=4, data=blazar_shifted, title=blazar_name, vmax=np.max(blazar_shifted))
+        make_plot(position=5, data=blazar_residual, title=blazar_name + ' diffuse', vmax=np.max(blazar_shifted))
+        make_plot(position=6, data=blazar_regrid_back, title=blazar_name, levels=five_sigma, plot='blazar', vmax=np.max(blazar_regrid_back))
+        make_plot(position=7, data=blazar_residual_regrid_back, title=blazar_name + ' diffuse', levels=five_sigma, plot='diffuse', layer=blazar_regrid_back, vmax=np.max(blazar_regrid_back))
+        # if testing:
+        #     plt.show()
+        # else:
+        plt.savefig(savefig, bbox_inches=bbox_inches)
+        print(f'Done! The plot is saved. View it with this: gpicview {savefig}')
+        # TODO make a df from the results and export it as a csv
 
 
 if __name__ == '__main__':
