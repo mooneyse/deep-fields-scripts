@@ -273,8 +273,8 @@ def main():
     bbox_inches = 'tight'
     testing = True
     new_size = 10
-    asdf = 'asdf
-    
+
+
     df_blazars = get_df(csv, format='csv', index='Source name')
     blazar_names, blazar_positions, cats, imgs = get_position(df_blazars, cat_dir=catalogue)
     for i, (blazar_name, blazar_position, cat) in enumerate(zip(blazar_names, blazar_positions, cats)):
