@@ -268,9 +268,9 @@ def main():
     font = 'STIXGeneral'
     math_font = 'cm'
     font_size = 12
-    figsize = (40, 20)
+    figsize = (17, 8)  # (40, 20)
     bbox_inches = 'tight'
-    testing = False
+    testing = True
     new_size = 10
 
     df_blazars = get_df(csv, format='csv', index='Source name')
@@ -305,19 +305,50 @@ def main():
         matplotlib.rcParams['mathtext.fontset'] = math_font
         matplotlib.rcParams['font.size'] = font_size
         plt.figure(figsize=figsize)
-        make_plot(position=1, data=point_source_regrid, title=point_source_id, vmax=np.max(point_source_regrid))
-        make_plot(position=2, data=model, title=point_source_id + ' model', vmax=np.max(point_source_regrid))
-        make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual', vmax=np.max(point_source_regrid))
-        make_plot(position=4, data=blazar_shifted, title=blazar_name, vmax=np.max(blazar_shifted))
-        make_plot(position=5, data=blazar_residual, title=blazar_name + ' diffuse', vmax=np.max(blazar_shifted))
-        make_plot(position=6, data=blazar_regrid_back, title=blazar_name, levels=five_sigma, plot='blazar', vmax=np.max(blazar_regrid_back))
-        make_plot(position=7, data=blazar_residual_regrid_back, title=blazar_name + ' diffuse', levels=five_sigma, plot='diffuse', layer=blazar_regrid_back, vmax=np.max(blazar_regrid_back))
-        if testing:
-            plt.show()
-        else:
-            plt.savefig(savefig, bbox_inches=bbox_inches)
-            print(f'Done! The plot is saved. View it with this: gpicview {savefig}')
+        # make_plot(position=1, data=point_source_regrid, title=point_source_id, vmax=np.max(point_source_regrid))
+        # make_plot(position=2, data=model, title=point_source_id + ' model', vmax=np.max(point_source_regrid))
+        # make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual', vmax=np.max(point_source_regrid))
+        # make_plot(position=4, data=blazar_shifted, title=blazar_name, vmax=np.max(blazar_shifted))
+        # make_plot(position=5, data=blazar_residual, title=blazar_name + ' diffuse', vmax=np.max(blazar_shifted))
+        # make_plot(position=6, data=blazar_regrid_back, title=blazar_name, levels=five_sigma, plot='blazar', vmax=np.max(blazar_regrid_back))
+        # make_plot(position=7, data=blazar_residual_regrid_back, title=blazar_name + ' diffuse', levels=five_sigma, plot='diffuse', layer=blazar_regrid_back, vmax=np.max(blazar_regrid_back))
+        # if testing:
+        #     plt.show()
+        # else:
+        #     plt.savefig(savefig, bbox_inches=bbox_inches)
+        #     print(f'Done! The plot is saved. View it with this: gpicview {savefig}')
         # TODO make a df from the results and export it as a csv
+        # TODO make a new plotter only showing the 2d blazar_regrid_back and blazar_residual_regrid_back with viridis
+        #      could I get this contour onto the radio image with proper axes?
+        #      my results might not be correct as I am manually blocking out areas for certain sources
+        # TODO plot negative flux to see if there are any bowls, using a diverging colour scale
+        new_plots(pos=1, data=blazar_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma)
+        new_plots(pos=2, data=blazar_residual_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma, layer=blazar_regrid_back, plot_type='diffuse')
+        plt.tight_layout()
+        plt.show()
+
+
+def new_plots(pos, data, layer=None, plot_type='blazar', vmax=1, levels=[]):
+    import aplpy
+    ax0 = plt.subplot(1, 2, pos)
+    ax0.get_xaxis().set_ticks([])
+    ax0.get_yaxis().set_ticks([])
+    image_size = 60 * 2  # image is 2 * 2 arcminutes
+    len_x, len_y = data.shape
+    x0, x1 = len_x * (0.65 + 0.125), len_x * 0.9
+    y = len_y * 0.1
+    plt.text((x0 + x1) / 2, y * (1.4), str(int(image_size * 0.25 * 0.5)) + '"', horizontalalignment='center', verticalalignment='center', fontsize=15, color='w')
+    plt.plot([x0, x1], [y, y], 'w-', lw=1.5)
+    image = ax0.imshow(data, origin='lower', cmap='viridis', vmin=0, vmax=vmax, norm=DS9Normalize(stretch='arcsinh'))
+    divider = make_axes_locatable(ax0)
+    cax0 = divider.append_axes('bottom', size='5%', pad=0.05)
+    # plt.colorbar(image, cax=cax0, orientation='horizontal')
+    plt.colorbar(image, cax=cax0, orientation='horizontal').ax.tick_params(labelsize=15)
+    if plot_type is 'blazar':
+        ax0.contour(data, levels=levels, origin='lower', colors='white')
+    elif plot_type is 'diffuse':
+        ax0.contour(layer, levels=levels, origin='lower', colors='white', alpha=0.5)
+        ax0.contour(data, levels=levels, origin='lower', colors='red')
 
 
 if __name__ == '__main__':
