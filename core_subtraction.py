@@ -55,7 +55,7 @@ def get_position(df, cat_dir):
 
 
 def nearest_point_source(df, position, s_code='S', flux_threshold=0.01,
-                         distance_threshold=1.0, elongation_threshold=1.2):
+                         distance_threshold=1.5, elongation_threshold=1.2):
     '''Find the nearest bright point source to a given blazar.'''
     pd.options.mode.chained_assignment = None  # disable warning, see https://stackoverflow.com/a/20627316/6386612
     df.reset_index(inplace=True)  # remove Source_id as index column
@@ -77,7 +77,7 @@ def nearest_point_source(df, position, s_code='S', flux_threshold=0.01,
     print('{i} is {s:.2f} degrees away and has a total flux density of {f:.2f} mJy.'.format(**results))
     if results['s'] > distance_threshold:
         print('The point source is too far away.')
-        sys.exit()
+        return False, False
     return results['i'], point_source_position
 
 
@@ -88,7 +88,7 @@ def get_fits(filename):
     return hdu, wcs
 
 
-def get_data(position, hdu, wcs, size=[1, 1] * u.arcmin):
+def get_data(position, hdu, wcs, size=[2, 2] * u.arcmin):
     '''Cut out the source from the FITS data.'''
     sky_position = SkyCoord(position[0], position[1], unit='deg')
     cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size, wcs=wcs)
@@ -270,7 +270,7 @@ def main():
     font_size = 12
     figsize = (40, 20)
     bbox_inches = 'tight'
-    testing = True
+    testing = False
     new_size = 10
 
     df_blazars = get_df(csv, format='csv', index='Source name')
@@ -282,6 +282,9 @@ def main():
         print(f'Analysing {blazar_name} which is in {image} (blazar {i + 1} of {len(blazar_names)}).')
         df_cat = get_df(catalogue, format='fits', index='Source_id')
         point_source_id, point_source_position = nearest_point_source(df_cat, blazar_position)
+        if point_source_id is False:
+            print('Going to the next iteration.')
+            continue
         hdu, wcs = get_fits(filename=image)
         blazar_data = get_data(position=blazar_position, hdu=hdu, wcs=wcs)
         blazar_data = housekeeping(blazar_name, blazar_data)
@@ -309,11 +312,11 @@ def main():
         make_plot(position=5, data=blazar_residual, title=blazar_name + ' diffuse', vmax=np.max(blazar_shifted))
         make_plot(position=6, data=blazar_regrid_back, title=blazar_name, levels=five_sigma, plot='blazar', vmax=np.max(blazar_regrid_back))
         make_plot(position=7, data=blazar_residual_regrid_back, title=blazar_name + ' diffuse', levels=five_sigma, plot='diffuse', layer=blazar_regrid_back, vmax=np.max(blazar_regrid_back))
-        # if testing:
-        #     plt.show()
-        # else:
-        plt.savefig(savefig, bbox_inches=bbox_inches)
-        print(f'Done! The plot is saved. View it with this: gpicview {savefig}')
+        if testing:
+            plt.show()
+        else:
+            plt.savefig(savefig, bbox_inches=bbox_inches)
+            print(f'Done! The plot is saved. View it with this: gpicview {savefig}')
         # TODO make a df from the results and export it as a csv
 
 
