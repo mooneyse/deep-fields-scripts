@@ -347,8 +347,8 @@ def new_plots(pos, data, layer=None, plot_type='blazar', vmax=1, levels=[]):
     if plot_type is 'blazar':
         ax0.contour(data, levels=levels, origin='lower', colors='white')
     elif plot_type is 'diffuse':
-        ax0.contour(layer, levels=levels, origin='lower', colors='white', alpha=0.5)
-        ax0.contour(data, levels=levels, origin='lower', colors='red')
+        ax0.contour(layer, levels=levels, origin='lower', colors='white', alpha=1)
+        ax0.contour(data, levels=levels, origin='lower', colors='magenta')
 
 
 if __name__ == '__main__':
