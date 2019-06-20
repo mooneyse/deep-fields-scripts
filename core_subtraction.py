@@ -6,6 +6,7 @@ a source with diffuse emission.'''
 import warnings
 warnings.filterwarnings('ignore')  # supress warnings
 
+import aplpy
 import sys
 import argparse
 import numpy as np
@@ -98,18 +99,68 @@ def get_data(position, hdu, wcs, size=[2, 2] * u.arcmin):
 
 def housekeeping(name, data):
     '''Some ad hoc adjustments to a few sources, made after visual inspection.'''
+    if name == '5BZQJ1422+3223':
+        print('Doing a little housekeeping on {}.'.format(name))
+        data[42:47, 55:60] = 0
+        data[6:10, 74:79] = 0
+
     if name == '5BZBJ1426+3404':
         print('Doing a little housekeeping on {}.'.format(name))
-        data[:10, :10] = 0
-    elif name == '5BZQJ1429+3529':
+        data[20:28,23:32] = 0  # data[:10, :10] = 0
+        data[68:75, 33:42] = 0
+
+    if name == '5BZQJ1429+3529':
         print('Doing a little housekeeping on {}.'.format(name))
-        data[:10, 20:] = 0
-    elif name == '5BZQJ1435+3353':
+        data[40:48, 10:17] = 0
+        data[10:26, 40:60] = 0  # data[:10, 20:] = 0
+
+    if name == '5BZQJ1435+3353':
         print('Doing a little housekeeping on {}.'.format(name))
-        data[8:13, 28:33] = 0
-    elif name == '5BZQJ1437+3618':
+        data[38:45, 5:11] = 0  # data[8:13, 28:33] = 0
+        data[73:79, 54:60] = 0
+        data[27:33, 48:53] = 0
+        data[16:22, 64:71] = 0
+
+    if name == '5BZQJ1437+3618':
         print('Doing a little housekeeping on {}.'.format(name))
-        data[1:10, :3] = 0
+        data[0:31, 4:26] = 0  # data[1:10, :3] = 0
+
+    if name == '5BZQJ1437+3519':
+        print('Doing a little housekeeping on {}.'.format(name))
+        # data[:, 60:] = 0
+
+    if name == '5BZBJ1558+5625':
+        print('Doing a little housekeeping on {}.'.format(name))
+        data[65:70, 36:43] = 0
+
+    if name == '5BZBJ1605+5421':
+        print('Doing a little housekeeping on {}.'.format(name))
+        data[53:64, 16:27] = 0
+        data[72:79, 35:45] = 0
+        data[76:79, 76:80] = 0
+        data[48:56, 75:80] = 0
+        data[6:11, 70:76] = 0
+        data[24:31, 42:48] = 0
+
+    if name == '5BZQJ1606+5405':
+        print('Doing a little housekeeping on {}.'.format(name))
+        data[57:68, 69:79] = 0
+        data[25:30, 11:17] = 0
+
+    if name == '5BZQJ1608+5613':
+        print('Doing a little housekeeping on {}.'.format(name))
+        data[19:30, 21:37] = 0
+
+    if name == '5BZQJ1619+5256':
+        print('Doing a little housekeeping on {}.'.format(name))
+        data[42:46, 48:55] = 0
+        data[27:32, 35:42] = 0
+
+    if name == '5BZBJ1037+5711':
+        print('Doing a little housekeeping on {}.'.format(name))
+        data[21:26, 27:32] = 0
+        data[55:61, 39:46] = 0
+
     return data
 
 
@@ -176,10 +227,10 @@ def get_noise_catalogue(df, blazar_name, new_data='', sigma=5):
     return five_sigma
 
 
-def jy_per_beam_to_jy(flux, beam_radius=6, sigma=1):
+def jy_per_beam_to_jy(flux, beam=6, sigma=5):
     '''Convert Jansky per beam measurements to Jansky measurements.'''
-    bmaj = beam_radius * u.arcsec
-    bmin = beam_radius * u.arcsec
+    bmaj = beam * u.arcsec
+    bmin = beam * u.arcsec
     fwhm_to_sigma = 1 / np.sqrt(8 * np.log(2))
     beam_area = 2 * np.pi * bmaj * bmin * (fwhm_to_sigma ** 2)
     beam_area = beam_area.to(u.sr)
@@ -187,6 +238,8 @@ def jy_per_beam_to_jy(flux, beam_radius=6, sigma=1):
     flux_jy = flux_jy_per_beam * beam_area
     # BUG this is way off but the code looks right
     # see http://docs.astropy.org/en/stable/api/astropy.units.equivalencies.brightness_temperature.html
+    # also see https://astronomy.stackexchange.com/a/20391/20014
+    # also see my note from 2019-06-20
     return flux_jy
 
 
@@ -250,6 +303,33 @@ def make_plot(position, data, title, rows=2, columns=7, origin='lower',
     ax1.plot_surface(x, y, data, cmap=cmap, vmin=vmin, vmax=vmax, linewidth=linewidth, edgecolors=line_colour)
 
 
+def new_plots(pos, data, layer=None, plot_type='blazar', vmax=1, levels=[]):
+    ax0 = plt.subplot(1, 2, pos)
+    ax0.get_xaxis().set_ticks([])
+    ax0.get_yaxis().set_ticks([])
+    image_size = 60 * 2  # image is 2 * 2 arcminutes
+    len_x, len_y = data.shape
+    x0, x1 = len_x * (0.65 + 0.125), len_x * 0.9
+    y = len_y * 0.1
+    plt.text((x0 + x1) / 2, y * (0.7), str(int(image_size * 0.25 * 0.5)) + '"', horizontalalignment='center', verticalalignment='center', fontsize=15, color='w')
+    plt.plot([x0, x1], [y, y], 'w-', lw=1.5)
+
+    image = ax0.imshow(data, origin='lower', cmap='viridis', vmax=vmax, vmin=0, norm=DS9Normalize(stretch='arcsinh'))
+    circle1 = plt.Circle([8, 8], (x1 - x0) * (6 / 15) / 2, ls='--', fc='None', ec='w')
+    ax0.add_artist(circle1)
+    divider = make_axes_locatable(ax0)
+    cax0 = divider.append_axes('bottom', size='5%', pad=0.05)
+    cbar = plt.colorbar(image, cax=cax0, orientation='horizontal')
+    cbar.ax.tick_params(labelsize=15)
+    cbar.ax.set_xlabel(r'Jy beam$^{-1}$', fontsize=15)
+    if plot_type is 'blazar':
+        ax0.contour(data, levels=levels, origin='lower', colors='white', alpha=0.67)
+    elif plot_type is 'diffuse':
+        ax0.contour(layer, levels=levels, origin='lower', colors='white', alpha=0.67)
+        ax0.contour(data, levels=levels, origin='lower', colors='magenta')  # in this case, data is the core subtracted array
+        # ax0.contourf(data, levels=[levels[0],levels[0]*100], origin='lower', colors='magenta', alpha=0.2)
+
+
 def main():
     '''Fit a Gaussian point spread function to a point source and subtract it from a source with diffuse emission.'''
     formatter_class = argparse.RawDescriptionHelpFormatter
@@ -279,6 +359,8 @@ def main():
         if testing:
             if i != 0:  # do one at a time
                 sys.exit()
+        # if blazar_name != '5BZQJ1437+3519':
+        #     continue
         print(f'Analysing {blazar_name} which is in {image} (blazar {i + 1} of {len(blazar_names)}).')
         df_cat = get_df(catalogue, format='fits', index='Source_id')
         point_source_id, point_source_position = nearest_point_source(df_cat, blazar_position)
@@ -299,6 +381,10 @@ def main():
         blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
         blazar_residual_regrid_back = regrid(blazar_residual, new_size=1 / new_size, normalise=False)
         five_sigma = get_noise_catalogue(df_blazars, blazar_name)
+        if blazar_name == '5BZQJ1437+3519':
+            print('Doing a little more housekeeping on {}.'.format(blazar_name))
+            blazar_regrid_back[:, 60:] = 0
+            blazar_residual_regrid_back[:, 60:] = 0
         diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
         savefig = output + '/' + blazar_name + '.png'
         matplotlib.rcParams['font.family'] = font
@@ -322,33 +408,19 @@ def main():
         #      could I get this contour onto the radio image with proper axes?
         #      my results might not be correct as I am manually blocking out areas for certain sources
         # TODO plot negative flux to see if there are any bowls, using a diverging colour scale
+        # TODO does the flux within 5 sigma equal the catalogue flux?
         new_plots(pos=1, data=blazar_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma)
+        # old_max = np.max(blazar_regrid_back)
+        # blazar_regrid_back[24:43, 36:42] = 0
+        # blazar_regrid_back[38:40, 42:43] = 0
+        # blazar_regrid_back[35:38, 35:36] = 0
+        # blazar_regrid_back[27:30, 42:43] = 0
+        # new_plots(pos=2, data=blazar_regrid_back, vmax=old_max, levels=five_sigma, layer=blazar_regrid_back, plot_type='diffuse')
         new_plots(pos=2, data=blazar_residual_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma, layer=blazar_regrid_back, plot_type='diffuse')
+        # plt.title(blazar_name, color='white')
         plt.tight_layout()
         plt.show()
-
-
-def new_plots(pos, data, layer=None, plot_type='blazar', vmax=1, levels=[]):
-    import aplpy
-    ax0 = plt.subplot(1, 2, pos)
-    ax0.get_xaxis().set_ticks([])
-    ax0.get_yaxis().set_ticks([])
-    image_size = 60 * 2  # image is 2 * 2 arcminutes
-    len_x, len_y = data.shape
-    x0, x1 = len_x * (0.65 + 0.125), len_x * 0.9
-    y = len_y * 0.1
-    plt.text((x0 + x1) / 2, y * (1.4), str(int(image_size * 0.25 * 0.5)) + '"', horizontalalignment='center', verticalalignment='center', fontsize=15, color='w')
-    plt.plot([x0, x1], [y, y], 'w-', lw=1.5)
-    image = ax0.imshow(data, origin='lower', cmap='viridis', vmin=0, vmax=vmax, norm=DS9Normalize(stretch='arcsinh'))
-    divider = make_axes_locatable(ax0)
-    cax0 = divider.append_axes('bottom', size='5%', pad=0.05)
-    # plt.colorbar(image, cax=cax0, orientation='horizontal')
-    plt.colorbar(image, cax=cax0, orientation='horizontal').ax.tick_params(labelsize=15)
-    if plot_type is 'blazar':
-        ax0.contour(data, levels=levels, origin='lower', colors='white')
-    elif plot_type is 'diffuse':
-        ax0.contour(layer, levels=levels, origin='lower', colors='white', alpha=1)
-        ax0.contour(data, levels=levels, origin='lower', colors='magenta')
+        # plt.savefig(f'{output}/2-plots-{blazar_name}.png')
 
 
 if __name__ == '__main__':
