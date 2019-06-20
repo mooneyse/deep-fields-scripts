@@ -247,6 +247,7 @@ def diffuse_fraction(df, name, blazar, diffuse, threshold):
     '''Calculate what the fraction of emission is diffuse.'''
     blazar_catalogue = df.loc[name, 'Total_flux']
     blazar_image = blazar[blazar > threshold].sum()
+    # print(f'There is {blazar_image} Jy per beam above the given \N{GREEK SMALL LETTER SIGMA}.')
     diffuse_image = diffuse[diffuse > threshold].sum()
     fraction = diffuse_image / blazar_image
     blazar_diffuse_catalogue = blazar_catalogue * fraction
@@ -350,7 +351,7 @@ def main():
     font_size = 12
     figsize = (17, 8)  # (40, 20)
     bbox_inches = 'tight'
-    testing = True
+    testing = False
     new_size = 10
 
     df_blazars = get_df(csv, format='csv', index='Source name')
@@ -359,8 +360,8 @@ def main():
         if testing:
             if i != 0:  # do one at a time
                 sys.exit()
-        # if blazar_name != '5BZQJ1437+3519':
-        #     continue
+        if blazar_name != '5BZQJ1437+3519':
+            continue
         print(f'Analysing {blazar_name} which is in {image} (blazar {i + 1} of {len(blazar_names)}).')
         df_cat = get_df(catalogue, format='fits', index='Source_id')
         point_source_id, point_source_position = nearest_point_source(df_cat, blazar_position)
