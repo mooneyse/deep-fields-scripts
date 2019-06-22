@@ -240,7 +240,7 @@ def jy_per_beam_to_jy(flux, beam=6, sigma=5):
     # see http://docs.astropy.org/en/stable/api/astropy.units.equivalencies.brightness_temperature.html
     # also see https://astronomy.stackexchange.com/a/20391/20014
     # also see my note from 2019-06-20
-    return flux_jy
+    return flux_jy #
 
 
 def diffuse_fraction(df, name, blazar, diffuse, threshold):
