@@ -255,6 +255,7 @@ def diffuse_fraction(df, name, blazar, diffuse, threshold):
     print('{0:.2%} of the emission is not from the core.'.format(fraction))
     results = {'total': blazar_catalogue * 1000, 'core': blazar_core_catalogue * 1000, 'diffuse': blazar_diffuse_catalogue * 1000}  # mJy
     print('The total flux density is {total:.2f} mJy, with the core contributing {core:.2f} mJy and the diffuse emission contributing {diffuse:.2f} mJy.'.format(**results))
+    return name, blazar_diffuse_catalogue
 
 
 def make_plot(position, data, title, rows=2, columns=7, origin='lower',
@@ -353,6 +354,7 @@ def main():
     bbox_inches = 'tight'
     testing = False
     new_size = 10
+    my_blazars, my_diffuse = [], []
 
     df_blazars = get_df(csv, format='csv', index='Source name')
     blazar_names, blazar_positions, catalogues, images = get_position(df_blazars, cat_dir=catalogue_dir)
@@ -360,8 +362,8 @@ def main():
         if testing:
             if i != 0:  # do one at a time
                 sys.exit()
-        if blazar_name != '5BZQJ1437+3519':
-            continue
+        # if blazar_name != '5BZQJ1437+3519':
+        #     continue
         print(f'Analysing {blazar_name} which is in {image} (blazar {i + 1} of {len(blazar_names)}).')
         df_cat = get_df(catalogue, format='fits', index='Source_id')
         point_source_id, point_source_position = nearest_point_source(df_cat, blazar_position)
@@ -386,7 +388,10 @@ def main():
             print('Doing a little more housekeeping on {}.'.format(blazar_name))
             blazar_regrid_back[:, 60:] = 0
             blazar_residual_regrid_back[:, 60:] = 0
-        diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
+        b, d = diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
+        my_blazars.append(b)
+        my_diffuse.append(d)
+        continue  # skip the plotting as I have that already
         savefig = output + '/' + blazar_name + '.png'
         matplotlib.rcParams['font.family'] = font
         matplotlib.rcParams['mathtext.fontset'] = math_font
@@ -422,6 +427,10 @@ def main():
         plt.tight_layout()
         plt.show()
         # plt.savefig(f'{output}/2-plots-{blazar_name}.png')
+
+    print()
+    for b, d in zip(my_blazars, my_diffuse):
+        print(f'{b} {d}')
 
 
 if __name__ == '__main__':
