@@ -31,9 +31,10 @@ __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '18 June 2019'
 
+
 def get_df(filename, format, index):
     '''Create the data frame.'''
-    if format is 'csv':
+    if format == 'csv':
         df = pd.read_csv(filename)
     else:
         data = Table.read(filename, format=format)
@@ -106,7 +107,7 @@ def housekeeping(name, data):
 
     if name == '5BZBJ1426+3404':
         print('Doing a little housekeeping on {}.'.format(name))
-        data[20:28,23:32] = 0  # data[:10, :10] = 0
+        data[20:28, 23:32] = 0  # data[:10, :10] = 0
         data[68:75, 33:42] = 0
 
     if name == '5BZQJ1429+3529':
