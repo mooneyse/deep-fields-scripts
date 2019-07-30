@@ -196,7 +196,7 @@ def main():
     args = parser.parse_args()
 
     csv = args.csv
-    ellipses, ra, dec, flux = get_ellipses(csv=csv)
+    ellipses = get_ellipses(csv=csv)
     names, ras, decs, fluxes = get_info(csv=csv)
     region_files = make_region_files(names=names, ellipses=ellipses)
     plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
