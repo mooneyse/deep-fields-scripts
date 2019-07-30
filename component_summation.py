@@ -162,7 +162,7 @@ def plot_ellipses(names, region_files, ras, decs, fluxes, radius=1 / 60,
                                                 region_files):
         field_file = fits_file(name=name, ra=ra)
         image = aplpy.FITSFigure(field_file)  # atom gives MemoryError
-        image.show_regions(region_file, alpha=0.5)
+        image.show_regions(region_file)  #, alpha=0.5)
         image.recenter(ra, dec, radius=radius)
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=flux,
                               stretch='arcsinh')
