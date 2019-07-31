@@ -163,7 +163,7 @@ def plot_ellipses(names, region_files, ras, decs, fluxes, radius=1 / 60,
         field_file = fits_file(name=name, ra=ra)
         image = aplpy.FITSFigure(field_file)
         # image.show_ellipses(x, y, major, minor, pa, alpha)
-        # image.show_ellipses(215.62658119819847, 32.386144922350375, 0.0019791919256910762, 0.0017320230658293837, 26.50274382478541 # color=white width=2
+        image.show_ellipses(215.62658119819847, 32.386144922350375, 0.0019791919256910762, 0.0017320230658293837, 26.50274382478541,color='red',alpha=0.5) # color=white width=2
         # image.show_ellipses(215.62599741144157, 32.390079856531585, 0.0022414190883326217, 0.0015686953818490415, 71.20109759695414 # color=white width=2
         # image.show_ellipses(215.62533081425357, 32.3881111530577, 0.0019319588882715177, 0.0013295906462059892, 54.14507686939447 # color=white width=2
         # image.show_ellipses(215.62798879841674, 32.388649926176036, 0.002393380264585014, 0.0013374535289494528, 136.2997864237571 # color=white width=2

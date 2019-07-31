@@ -16,7 +16,7 @@ __date__ = '18 June 2019'
 
 
 def save_cutout(filename, position, size, source_name,
-                my_dir='/data5/sean/deep-fields/images/radio-fits/'):
+                my_dir='/mnt/closet/deep-fields/images/radio-fits/'):
     """Make postage stamp and save it.
 
     Parameters
@@ -32,11 +32,25 @@ def save_cutout(filename, position, size, source_name,
     -------
     None
     """
+    import numpy as np
     hdu = fits.open(filename)[0]  # load the image and the wcs
-    wcs = WCS(hdu.header)
-    # print(wcs)
+    # wcs = WCS(hdu.header, naxis=2) works!
+    wcs = WCS(hdu.header, naxis=4) #, fix=True)
     # make the cutout, including the wcs
-    cutout = Cutout2D(hdu.data, position=position, size=size, wcs=wcs)
+    # data = hdu.data[0,0,:,:]
+    # data = data.reshape(data.shape[2:])
+    # cutout = Cutout2D(data, position=position, size=size, wcs=wcs) works!
+    # print(hdu.data[0,0,100,100])
+    asdf = np.zeros((1,1,1,2))
+    print(asdf)
+    print(hdu.data[:,:,0,0].shape)
+    print(hdu.data.shape, asdf.shape)
+    print(hdu.data.ndim, asdf.ndim)
+    # print(np.array([[[[215],
+    #                   [32]]]]))
+    # print(np.array([[[[215],
+    #                   [32]]]]).shape)
+    cutout = Cutout2D(hdu.data, position=asdf, size=size, wcs=wcs)
 
     # Put the cutout image in the fits hdu
     hdu.data = cutout.data
