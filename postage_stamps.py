@@ -33,25 +33,16 @@ def save_cutout(filename, position, size, source_name,
     None
     """
     hdu = fits.open(filename)[0]  # load the image and the wcs
-    # wcs = WCS(hdu.header)[:, :, :, :]
-    wcs = WCS(hdu.header)
-    # wcs = WCS(hdu.header, naxis=4) #, fix=True)
-    # make the cutout, including the wcs
-    data = hdu.data#[0,0,:,:]
-    # data = data.reshape(data.shape[2:])
-    cutout = Cutout2D(data, position=position, size=size, wcs=wcs) #works!
-    # import matplotlib.pyplot as plt
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection=wcs)
-    # ax.imshow(data, origin='lower', cmap='gist_heat_r')
-    # plt.show()
-    # cutout = Cutout2D(data, position=position, size=size, wcs=wcs)
-    #
+    wcs = WCS(hdu.header, naxis=2)  # , naxis=4
+    data = hdu.data[0,0,:,:]
+    import numpy as np
+    cutout = Cutout2D(data, position=position, size=size, wcs=wcs)
+    asdf = np.zeros((1,1,80,80))
     hdu.data = cutout.data  # put the cutout image in the fits hdu
     hdu.header.update(cutout.wcs.to_header())  # update the fits header
     cutout_filename = f'{my_dir}{source_name}.fits'
     hdu.writeto(cutout_filename, overwrite=True)  # save
-    print(cutout_filename)
+    print(f'ds9 {cutout_filename}')
 
 
 def main():
@@ -66,7 +57,7 @@ def main():
                         '--filename',
                         required=False,
                         type=str,
-                        default= '/mnt/closet/deep-fields/catalogues/lockman.hole.11.06.2019.slice.fits',
+                        default= '/mnt/closet/deep-fields/catalogues/lockman.hole.11.06.2019.img.fits',
                         help='Bootes FITS file')
 
     args = parser.parse_args()
