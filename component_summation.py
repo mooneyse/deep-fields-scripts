@@ -191,7 +191,7 @@ def main():
     None
     """
 
-    server = False
+    server = True
     my_dir = 'data5/sean' if server else 'mnt/closet'
     my_dir = f'/{my_dir}/deep-fields/'
 
@@ -219,10 +219,11 @@ def main():
         print(f'Done! View it now: gpicview {my_dir}/{name}.png')
         sys.exit()
 
-
-
     # plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
     #               fluxes=fluxes, my_dir=my_dir)
+
+    # def do_the_math()
+    # do_the_math()
 
 
 if __name__ == '__main__':
