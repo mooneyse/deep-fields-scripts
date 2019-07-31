@@ -32,38 +32,26 @@ def save_cutout(filename, position, size, source_name,
     -------
     None
     """
-    import numpy as np
     hdu = fits.open(filename)[0]  # load the image and the wcs
-    wcs = WCS(hdu.header, naxis=2)  # works!
+    # wcs = WCS(hdu.header)[:, :, :, :]
+    wcs = WCS(hdu.header)
     # wcs = WCS(hdu.header, naxis=4) #, fix=True)
     # make the cutout, including the wcs
-    # data = hdu.data[0,0,:,:]
+    data = hdu.data#[0,0,:,:]
     # data = data.reshape(data.shape[2:])
-    # cutout = Cutout2D(data, position=position, size=size, wcs=wcs) works!
-    # print(hdu.data[0,0,100,100])
-    asdf = np.zeros((1,1,1,2))
-    print(asdf)
-    asdf = hdu.data[:,:,1222,422]
-    # print(hdu.data[:,:,0,0].shape)
-    # print(len(hdu.data), len(asdf))
-    # print(hdu.data[0,0,:,:].shape, asdf[0,0,:,:].shape)
-    # print(hdu.data.ndim, asdf.ndim)
-
-    # print(np.array([[[[215],
-    #                   [32]]]]))
-    # print(np.array([[[[215],
-    #                   [32]]]]).shape)
-    cutout = Cutout2D(hdu.data[0,0,:,:], position=position, size=size, wcs=wcs)
-
-    # Put the cutout image in the fits hdu
-    hdu.data = cutout.data
-
-    # update the fits header with the cutout wcs
-    hdu.header.update(cutout.wcs.to_header())
-
-    # Write the cutout to a new FITS file
+    cutout = Cutout2D(data, position=position, size=size, wcs=wcs) #works!
+    # import matplotlib.pyplot as plt
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection=wcs)
+    # ax.imshow(data, origin='lower', cmap='gist_heat_r')
+    # plt.show()
+    # cutout = Cutout2D(data, position=position, size=size, wcs=wcs)
+    #
+    hdu.data = cutout.data  # put the cutout image in the fits hdu
+    hdu.header.update(cutout.wcs.to_header())  # update the fits header
     cutout_filename = f'{my_dir}{source_name}.fits'
-    hdu.writeto(cutout_filename, overwrite=True)
+    hdu.writeto(cutout_filename, overwrite=True)  # save
+    print(cutout_filename)
 
 
 def main():
@@ -78,12 +66,12 @@ def main():
                         '--filename',
                         required=False,
                         type=str,
-                        default='/mnt/closet/deep-fields/catalogues/bootes.11.06.2019.img.fits',
+                        default= '/mnt/closet/deep-fields/catalogues/lockman.hole.11.06.2019.slice.fits',
                         help='Bootes FITS file')
 
     args = parser.parse_args()
     filename = args.filename
-    position = SkyCoord(215.62658, 32.38622, unit='deg')
+    position = SkyCoord(161.6356597, 58.4681410, unit='deg')
     size = u.Quantity((2, 2), u.arcmin)
 
     save_cutout(filename=filename,
