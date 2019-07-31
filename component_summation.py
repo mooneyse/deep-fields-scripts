@@ -214,7 +214,7 @@ def main():
                                     edgecolor='white')
 
         image.show_colorscale(cmap='viridis', vmin=0, vmax=peak,
-                              stretch='log')
+                              stretch='arcsinh')
         image.save(f'{my_dir}images/component-summation/{name}.png')
         print(f'Done! View it now: gpicview {my_dir}/{name}.png')
         sys.exit()
