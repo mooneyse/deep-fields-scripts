@@ -207,8 +207,8 @@ def main():
     ellipses = get_ellipses(csv=csv)
     names, ras, decs, fluxes = get_info(csv=csv)
     region_files = make_region_files(names=names, ellipses=ellipses)
-    # plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
-    #               fluxes=fluxes)
+    plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
+                  fluxes=fluxes)
 
 
 if __name__ == '__main__':
