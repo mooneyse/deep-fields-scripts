@@ -70,7 +70,8 @@ def main():
     # size = u.Quantity((2, 2), u.arcmin)
 
     save_cutout(filename=filename,
-                position=[215.62658*u.deg, 32.38622*u.deg, 0, 0], size=[2,2,:,:], source_name='5BZQJ1422+3223')
+                position=[215.62658*u.deg, 32.38622*u.deg, 0, 0],
+                size=[2, 2, 0, 0], source_name='5BZQJ1422+3223')
 
 
 if __name__ == '__main__':
