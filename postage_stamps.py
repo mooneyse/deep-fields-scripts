@@ -4,9 +4,10 @@
 cutout WCS."""
 
 import argparse
+import numpy as np
 from astropy.io import fits
 from astropy.nddata import Cutout2D
-from astropy.wcs import WCS
+from astropy import wcs as PPP
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
@@ -32,25 +33,16 @@ def save_cutout(filename, position, size, source_name,
     -------
     None
     """
-
     hdu = fits.open(filename)[0]  # load the image and the wcs
-    wcs = WCS(hdu.header)
-    print(wcs.all_world2pix)
-    # pixcrd2 = wcs.wcs_world2pix(0,0,161.6356597, 58.4681410,0)
-    # print(pixcrd2)
+    w = PPP.WCS(hdu.header, naxis=2)
 
-    hdu.data = hdu.data[0, 0, 100:200, 100:200]  # cropped data
-    cropped_wcs = wcs[0, 0, 100:200, 100:200]  # cropped wcs
+    hdu.data = np.squeeze(hdu.data)  # two dimensions only
 
-    # data = hdu.data[0, 0, :, :]
-    # import numpy as np
-    # cutout = Cutout2D(data, position=position, size=size, wcs=wcs)
-    # asdf = np.zeros((1,1,80,80))
-    # print(asdf)
-    # hdu.data = asdf # cutout.data  # put the cutout image in the fits hdu
-    # hdu.header.update(cropped_wcs)  # update the fits header
+    cutout = Cutout2D(hdu.data, position=position, size=size, wcs=w)
+    # hdu.header.update(cutout.wcs.to_header())  # update the fits header
+    hdu.header.update(w.to_header())  # update the fits header
 
-    cutout_filename = f'{my_dir}{source_name}.fits'
+    cutout_filename = '/mnt/closet/deep-fields/catalogues/lockman.hole.11.06.2019.slice.fits'  # f'{my_dir}{source_name}.fits'
     hdu.writeto(cutout_filename, overwrite=True)  # save
     print(f'ds9 {cutout_filename}')
 

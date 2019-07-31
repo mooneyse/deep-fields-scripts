@@ -12,7 +12,7 @@ __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '18 June 2019'
 
 
-def get_ellipses(csv):
+def get_ellipses(my_dir):
     """Get the ellipse parameters from the CSV.
 
     Parameters
@@ -27,6 +27,7 @@ def get_ellipses(csv):
         semi-minor axis, position angle, total flux density (Jy) and fractional
         flux density (Jy) for each row in the CSV.
     """
+    csv = my_dir + 'catalogues/deep.fields.29.07.2019.gaul.csv'
     df = pd.read_csv(csv)
 
     source_name = df['Source name']
@@ -47,7 +48,7 @@ def get_ellipses(csv):
     return ellipses
 
 
-def get_info(csv):
+def get_info(my_dir):
     """Get the unique list of blazar names.
 
     Parameters
@@ -60,6 +61,7 @@ def get_info(csv):
     list
         Names of the blazars.
     """
+    csv = my_dir + 'catalogues/deep.fields.29.07.2019.gaul.csv'
     df = pd.read_csv(csv)
 
     names = list(dict.fromkeys(df['Source name']).keys())
@@ -87,8 +89,7 @@ def unpack(s):
     return x
 
 
-def make_region_files(names, ellipses,
-                      my_dir='/data5/sean/deep-fields/images/regions/'):
+def make_region_files(names, ellipses, my_dir):
     """Create region files for each source.
 
     Parameters
@@ -107,6 +108,7 @@ def make_region_files(names, ellipses,
               'hlist=8 3 width=1 font="helvetica 10 normal roman" select=1 h' +
               'ighlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 sou' +
               'rce=1\nicrs\n')
+    my_dir = my_dir + 'images/regions/'
 
     region_files = []
     for name in names:
@@ -124,7 +126,7 @@ def make_region_files(names, ellipses,
     return region_files
 
 
-def fits_file(name, ra, my_dir='/data5/sean/deep-fields/catalogues/'):
+def fits_file(name, ra, my_dir):
     """Get the FITS file for a given source.
 
     Parameters
@@ -137,19 +139,18 @@ def fits_file(name, ra, my_dir='/data5/sean/deep-fields/catalogues/'):
     """
 
     if ra > 156 and ra < 168:
-        field_file = f'{my_dir}lockman.hole.11.06.2019.img.fits'
+        field_file = f'{my_dir}catalogues/lockman.hole.11.06.2019.img.fits'
     elif ra > 214 and ra < 222:
-        field_file = f'{my_dir}bootes.11.06.2019.img.fits'
+        field_file = f'{my_dir}catalogues/bootes.11.06.2019.img.fits'
     elif ra > 237 and ra < 248:
-        field_file = f'{my_dir}elias.n1.11.06.2019.img.fits'
+        field_file = f'{my_dir}catalogues/elias.n1.11.06.2019.img.fits'
     else:
         raise ValueError(f'{name} not in any field.')
     return field_file
 
 
-def plot_ellipses(names, region_files, ras, decs, fluxes, radius=1 / 60,
-                  cmap='viridis', vmin=0,
-                  my_dir='/data5/sean/deep-fields/images/component-summation'):
+def plot_ellipses(names, region_files, ras, decs, fluxes, my_dir,
+                  radius=1 / 60, cmap='viridis', vmin=0):
     """Use AplPy's show_regions to plot the region files.
 
     Parameters
@@ -160,9 +161,8 @@ def plot_ellipses(names, region_files, ras, decs, fluxes, radius=1 / 60,
     """
     for name, ra, dec, flux, region_file in zip(names, ras, decs, fluxes,
                                                 region_files):
-        field_file = fits_file(name=name, ra=ra)
+        field_file = fits_file(name=name, ra=ra, my_dir=my_dir)
         image = aplpy.FITSFigure(field_file)
-        # image.show_ellipses(x, y, major, minor, pa, alpha)
         image.show_ellipses(215.62658119819847, 32.386144922350375, 0.0019791919256910762 * 2, 0.0017320230658293837* 2, 26.50274382478541, facecolor=(1, 1, 1, 0.6), edgecolor='white')
         image.show_ellipses(215.62599741144157, 32.390079856531585, 0.0022414190883326217* 2, 0.0015686953818490415* 2, 71.20109759695414, facecolor=(1, 1, 1, 0.3), edgecolor='white')
         image.show_ellipses(215.62533081425357, 32.3881111530577, 0.0019319588882715177* 2, 0.0013295906462059892* 2, 54.14507686939447, facecolor=(1, 1, 1, 0.9), edgecolor='white')
@@ -173,8 +173,8 @@ def plot_ellipses(names, region_files, ras, decs, fluxes, radius=1 / 60,
         # image.show_regions(region_file, facecolor=(255, 0, 0, 0.5))
         image.recenter(ra, dec, radius=radius)
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=flux,
-                              stretch='arcsinh')
-        image.save(f'{my_dir}/{name}.png')
+                              stretch='log')
+        image.save(f'{my_dir}images/component-summation/{name}.png')
         print(f'Done! View it: gpicview {my_dir}/{name}.png')
         sys.exit()
 
@@ -190,25 +190,39 @@ def main():
     -------
     None
     """
-    formatter_class = argparse.RawDescriptionHelpFormatter
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=formatter_class)
-    parser.add_argument('-c',
-                        '--csv',
-                        required=False,
-                        type=str,
-                        default=('/data5/sean/deep-fields/catalogues/' +
-                                 'deep.fields.29.07.2019.gaul.csv'),
-                        help='CSV catalogue of the blazars')
 
-    args = parser.parse_args()
+    server = False
+    my_dir = 'data5/sean' if server else 'mnt/closet'
+    my_dir = f'/{my_dir}/deep-fields/'
 
-    csv = args.csv
-    ellipses = get_ellipses(csv=csv)
-    names, ras, decs, fluxes = get_info(csv=csv)
-    region_files = make_region_files(names=names, ellipses=ellipses)
-    plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
-                  fluxes=fluxes)
+    ellipses = get_ellipses(my_dir=my_dir)
+    names, ras, decs, peaks = get_info(my_dir=my_dir)
+
+    # region_files = make_region_files(namesr=names, ellipses=ellipses,
+    #                                  my_dir=my_dir)
+
+    for name, ra, dec, peak in zip(names, ras, decs, peaks):
+        print(f"Imaging {name}.")
+        field_file = fits_file(name=name, ra=ra, my_dir=my_dir)
+        image = aplpy.FITSFigure(field_file, downsample=1000)
+        image.recenter(ra, dec, radius=1 / 60)
+
+        for n, _, flux, ra, dec, maj, min, pa in ellipses:
+            if name == n:
+                image.show_ellipses(ra, dec, maj, min, pa,
+                                    facecolor=(1, 1, 1, {flux}),
+                                    edgecolor='white')
+
+        image.show_colorscale(cmap='viridis', vmin=0, vmax=peak,
+                              stretch='log')
+        image.save(f'{my_dir}images/component-summation/{name}.png')
+        print(f'Done! View it now: gpicview {my_dir}/{name}.png')
+        sys.exit()
+
+
+
+    # plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
+    #               fluxes=fluxes, my_dir=my_dir)
 
 
 if __name__ == '__main__':
