@@ -170,7 +170,7 @@ def plot_ellipses(names, region_files, ras, decs, fluxes, radius=1 / 60,
         # image.show_ellipses(215.62888016747715, 32.38594703791433, 0.0019982220509760303, 0.0014247094831749978, 145.62049848632338 # color=white width=2
         # image.show_ellipses(215.6303928999856, 32.38930203775074, 0.002592036023827361, 0.0008940889628385513, 160.10575386961898 # color=white width=2
 
-        image.show_regions(region_file, facecolor=(255, 0, 0, 0.5))
+        # image.show_regions(region_file, facecolor=(255, 0, 0, 0.5))
         image.recenter(ra, dec, radius=radius)
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=flux,
                               stretch='arcsinh')
