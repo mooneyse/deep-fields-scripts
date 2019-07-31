@@ -34,7 +34,7 @@ def save_cutout(filename, position, size, source_name,
     """
     hdu = fits.open(filename)[0]  # load the image and the wcs
     wcs = WCS(hdu.header)
-    print(wcs)
+    # print(wcs)
     # make the cutout, including the wcs
     cutout = Cutout2D(hdu.data, position=position, size=size, wcs=wcs)
 
@@ -61,7 +61,7 @@ def main():
                         '--filename',
                         required=False,
                         type=str,
-                        default='/data5/sean/deep-fields/catalogues/bootes.11.06.2019.img.fits',
+                        default='/mnt/closet/deep-fields/catalogues/bootes.11.06.2019.img.fits',
                         help='Bootes FITS file')
 
     args = parser.parse_args()
