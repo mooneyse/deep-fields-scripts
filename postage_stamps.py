@@ -34,7 +34,7 @@ def save_cutout(filename, position, size, source_name,
     """
     hdu = fits.open(filename)[0]  # load the image and the wcs
     wcs = WCS(hdu.header)
-
+    print(wcs)
     # make the cutout, including the wcs
     cutout = Cutout2D(hdu.data, position=position, size=size, wcs=wcs)
 
@@ -66,12 +66,13 @@ def main():
 
     args = parser.parse_args()
     filename = args.filename
-    # position = SkyCoord(215.62658, 32.38622, unit='deg')
-    # size = u.Quantity((2, 2), u.arcmin)
+    position = SkyCoord(215.62658, 32.38622, unit='deg')
+    size = u.Quantity((2, 2), u.arcmin)
 
     save_cutout(filename=filename,
-                position=[215.62658*u.deg, 32.38622*u.deg, 0, 0],
-                size=[2, 2], source_name='5BZQJ1422+3223')
+                position=position,
+                size=size,
+                source_name='5BZQJ1422+3223')
 
 
 if __name__ == '__main__':
