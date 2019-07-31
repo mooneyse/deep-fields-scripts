@@ -210,7 +210,7 @@ def main():
         for n, _, flux, ra, dec, maj, min, pa in ellipses:
             if name == n:
                 image.show_ellipses(ra, dec, maj, min, pa,
-                                    facecolor=(1, 1, 1, {flux}),
+                                    facecolor=(1, 1, 1, flux),
                                     edgecolor='white')
 
         image.show_colorscale(cmap='viridis', vmin=0, vmax=peak,
