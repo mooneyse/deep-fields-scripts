@@ -32,9 +32,9 @@ def get_ellipses(csv):
     source_name = df['Source name']
     ra = df['RA_2']
     dec = df['DEC_2']
-    major = df['Maj_2']  # Maj_img_plane_2, DC_Maj_2, DC_Maj_img_plane_2
-    minor = df['Min_2']  # Min_img_plane_2, DC_Min_2, DC_Min_img_plane_2
-    pa = df['PA_2']  # PA_img_plane_2, DC_PA_2, DC_PA_img_plane_2
+    major = df['Maj_2']  # Maj_2, Maj_img_plane_2, DC_Maj_2, DC_Maj_img_plane_2
+    minor = df['Min_2']  # Min_2, Min_img_plane_2, DC_Min_2, DC_Min_img_plane_2
+    pa = df['PA_2'] + 90  # PA_2, PA_img_plane_2, DC_PA_2, DC_PA_img_plane_2
     flux = df['Total_flux_2']
     fraction = flux / df['Total_flux_1']
 
@@ -112,7 +112,7 @@ def make_region_files(names, ellipses,
     for name in names:
         region = f'{my_dir}{name}.reg'
         region_files.append(region)
-        with open(region, 'a') as the_file:
+        with open(region, 'w+') as the_file:
             the_file.write(header)
 
         for name_, flux, fraction, *ellipse in ellipses:
@@ -163,12 +163,12 @@ def plot_ellipses(names, region_files, ras, decs, fluxes, radius=1 / 60,
         field_file = fits_file(name=name, ra=ra)
         image = aplpy.FITSFigure(field_file)
         # image.show_ellipses(x, y, major, minor, pa, alpha)
-        image.show_ellipses(215.62658119819847, 32.386144922350375, 0.0019791919256910762, 0.0017320230658293837, 26.50274382478541, facecolor=(1, 1, 1, 0.6), edgecolor='white')
-        image.show_ellipses(215.62599741144157, 32.390079856531585, 0.0022414190883326217, 0.0015686953818490415, 71.20109759695414, facecolor=(1, 1, 1, 0.3), edgecolor='white')
-        image.show_ellipses(215.62533081425357, 32.3881111530577, 0.0019319588882715177, 0.0013295906462059892, 54.14507686939447, facecolor=(1, 1, 1, 0.9), edgecolor='white')
-        image.show_ellipses(215.62798879841674, 32.388649926176036, 0.002393380264585014, 0.0013374535289494528, 136.2997864237571, facecolor=(1, 1, 1, 0.8), edgecolor='white')
-        image.show_ellipses(215.62888016747715, 32.38594703791433, 0.0019982220509760303, 0.0014247094831749978, 145.62049848632338, facecolor=(1, 1, 1, 0.5), edgecolor='white')
-        image.show_ellipses(215.6303928999856, 32.38930203775074, 0.002592036023827361, 0.0008940889628385513, 160.10575386961898, facecolor=(1, 1, 1, 0.4), edgecolor='white')
+        image.show_ellipses(215.62658119819847, 32.386144922350375, 0.0019791919256910762 * 2, 0.0017320230658293837* 2, 26.50274382478541, facecolor=(1, 1, 1, 0.6), edgecolor='white')
+        image.show_ellipses(215.62599741144157, 32.390079856531585, 0.0022414190883326217* 2, 0.0015686953818490415* 2, 71.20109759695414, facecolor=(1, 1, 1, 0.3), edgecolor='white')
+        image.show_ellipses(215.62533081425357, 32.3881111530577, 0.0019319588882715177* 2, 0.0013295906462059892* 2, 54.14507686939447, facecolor=(1, 1, 1, 0.9), edgecolor='white')
+        image.show_ellipses(215.62798879841674, 32.388649926176036, 0.002393380264585014* 2, 0.0013374535289494528* 2, 136.2997864237571, facecolor=(1, 1, 1, 0.8), edgecolor='white')
+        image.show_ellipses(215.62888016747715, 32.38594703791433, 0.0019982220509760303* 2, 0.0014247094831749978* 2, 145.62049848632338, facecolor=(1, 1, 1, 0.5), edgecolor='white')
+        image.show_ellipses(215.6303928999856, 32.38930203775074, 0.002592036023827361* 2, 0.0008940889628385513* 2, 160.10575386961898, facecolor=(1, 1, 1, 0.4), edgecolor='white')
 
         # image.show_regions(region_file, facecolor=(255, 0, 0, 0.5))
         image.recenter(ra, dec, radius=radius)
@@ -207,8 +207,8 @@ def main():
     ellipses = get_ellipses(csv=csv)
     names, ras, decs, fluxes = get_info(csv=csv)
     region_files = make_region_files(names=names, ellipses=ellipses)
-    plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
-                  fluxes=fluxes)
+    # plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
+    #               fluxes=fluxes)
 
 
 if __name__ == '__main__':

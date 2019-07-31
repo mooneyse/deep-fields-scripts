@@ -32,8 +32,12 @@ def save_cutout(filename, position, size, source_name,
     -------
     None
     """
+
     hdu = fits.open(filename)[0]  # load the image and the wcs
     wcs = WCS(hdu.header)
+    print(wcs.all_world2pix)
+    # pixcrd2 = wcs.wcs_world2pix(0,0,161.6356597, 58.4681410,0)
+    # print(pixcrd2)
 
     hdu.data = hdu.data[0, 0, 100:200, 100:200]  # cropped data
     cropped_wcs = wcs[0, 0, 100:200, 100:200]  # cropped wcs
@@ -44,7 +48,7 @@ def save_cutout(filename, position, size, source_name,
     # asdf = np.zeros((1,1,80,80))
     # print(asdf)
     # hdu.data = asdf # cutout.data  # put the cutout image in the fits hdu
-    hdu.header.update(wcs.to_header())  # update the fits header
+    # hdu.header.update(cropped_wcs)  # update the fits header
 
     cutout_filename = f'{my_dir}{source_name}.fits'
     hdu.writeto(cutout_filename, overwrite=True)  # save
