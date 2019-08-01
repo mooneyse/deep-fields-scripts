@@ -3,7 +3,7 @@
 """Plot PyBDSF componets for each source."""
 
 import sys
-import argparse
+import matplotlib.pylab as pl
 import pandas as pd
 import aplpy
 
@@ -35,7 +35,7 @@ def get_ellipses(my_dir):
     dec = df['DEC_2']
     major = df['Maj_2']  # Maj_2, Maj_img_plane_2, DC_Maj_2, DC_Maj_img_plane_2
     minor = df['Min_2']  # Min_2, Min_img_plane_2, DC_Min_2, DC_Min_img_plane_2
-    pa = df['PA_2'] + 90  # PA_2, PA_img_plane_2, DC_PA_2, DC_PA_img_plane_2
+    pa = df['PA_2']  # PA_2, PA_img_plane_2, DC_PA_2, DC_PA_img_plane_2
     flux = df['Total_flux_2']
     fraction = flux / df['Total_flux_1']
 
@@ -131,6 +131,12 @@ def fits_file(name, ra, my_dir):
 
     Parameters
     ----------
+    name : string
+        Source name.
+    ra : float
+        Right ascension.
+    my_dir : string
+        Working directory.
 
     Returns
     -------
@@ -149,34 +155,59 @@ def fits_file(name, ra, my_dir):
     return field_file
 
 
-def plot_ellipses(names, region_files, ras, decs, fluxes, my_dir,
-                  radius=1 / 60, cmap='viridis', vmin=0):
+def plot_ellipses(names, ras, decs, peaks, my_dir, ellipses):
     """Use AplPy's show_regions to plot the region files.
 
     Parameters
     ----------
+    names : list
+        Source names.
+    ras : list
+        Right ascensions.
+    decs : list
+        Declinations.
+    peaks : list
+        Peak fluxes.
+    my_dir : string
+        Working directory.
+    ellipses : list
+        Tuple of ellipse parameters.
 
     Returns
     -------
+    None.
     """
-    for name, ra, dec, flux, region_file in zip(names, ras, decs, fluxes,
-                                                region_files):
+    for name, ra, dec, peak in zip(names, ras, decs, peaks):
+        print(f"Imaging {name}.")
         field_file = fits_file(name=name, ra=ra, my_dir=my_dir)
         image = aplpy.FITSFigure(field_file)
-        image.show_ellipses(215.62658119819847, 32.386144922350375, 0.0019791919256910762 * 2, 0.0017320230658293837* 2, 26.50274382478541, facecolor=(1, 1, 1, 0.6), edgecolor='white')
-        image.show_ellipses(215.62599741144157, 32.390079856531585, 0.0022414190883326217* 2, 0.0015686953818490415* 2, 71.20109759695414, facecolor=(1, 1, 1, 0.3), edgecolor='white')
-        image.show_ellipses(215.62533081425357, 32.3881111530577, 0.0019319588882715177* 2, 0.0013295906462059892* 2, 54.14507686939447, facecolor=(1, 1, 1, 0.9), edgecolor='white')
-        image.show_ellipses(215.62798879841674, 32.388649926176036, 0.002393380264585014* 2, 0.0013374535289494528* 2, 136.2997864237571, facecolor=(1, 1, 1, 0.8), edgecolor='white')
-        image.show_ellipses(215.62888016747715, 32.38594703791433, 0.0019982220509760303* 2, 0.0014247094831749978* 2, 145.62049848632338, facecolor=(1, 1, 1, 0.5), edgecolor='white')
-        image.show_ellipses(215.6303928999856, 32.38930203775074, 0.002592036023827361* 2, 0.0008940889628385513* 2, 160.10575386961898, facecolor=(1, 1, 1, 0.4), edgecolor='white')
+        image.recenter(ra, dec, radius=1 / 60)
+        for n, _, flux, ra, dec, maj, min, pa in ellipses:
+            if name == n:
+                facecolor = pl.cm.Greys(255 * flux)
+                image.show_ellipses(ra, dec, maj * 2, min * 2, pa + 90,
+                                    facecolor=facecolor,
+                                    edgecolor='white')
 
-        # image.show_regions(region_file, facecolor=(255, 0, 0, 0.5))
-        image.recenter(ra, dec, radius=radius)
-        image.show_colorscale(cmap=cmap, vmin=vmin, vmax=flux,
-                              stretch='log')
+        image.show_colorscale(cmap='viridis', vmin=0, vmax=peak,
+                              stretch='arcsinh')
         image.save(f'{my_dir}images/component-summation/{name}.png')
-        print(f'Done! View it: gpicview {my_dir}/{name}.png')
+        print(f'Done! View it now: gpicview {my_dir}/{name}.png')
         sys.exit()
+
+
+def do_the_math():
+    """Find the core and diffuse flux density.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+    pass
 
 
 def main():
@@ -201,29 +232,10 @@ def main():
     # region_files = make_region_files(namesr=names, ellipses=ellipses,
     #                                  my_dir=my_dir)
 
-    for name, ra, dec, peak in zip(names, ras, decs, peaks):
-        print(f"Imaging {name}.")
-        field_file = fits_file(name=name, ra=ra, my_dir=my_dir)
-        image = aplpy.FITSFigure(field_file, downsample=1000)
-        image.recenter(ra, dec, radius=1 / 60)
+    plot_ellipses(names=names, ras=ras, decs=decs, peaks=peaks, my_dir=my_dir,
+                  ellipses=ellipses)
 
-        for n, _, flux, ra, dec, maj, min, pa in ellipses:
-            if name == n:
-                image.show_ellipses(ra, dec, maj, min, pa,
-                                    facecolor=(1, 1, 1, flux),
-                                    edgecolor='white')
-
-        image.show_colorscale(cmap='viridis', vmin=0, vmax=peak,
-                              stretch='arcsinh')
-        image.save(f'{my_dir}images/component-summation/{name}.png')
-        print(f'Done! View it now: gpicview {my_dir}/{name}.png')
-        sys.exit()
-
-    # plot_ellipses(names=names, region_files=region_files, ras=ras, decs=decs,
-    #               fluxes=fluxes, my_dir=my_dir)
-
-    # def do_the_math()
-    # do_the_math()
+    do_the_math()
 
 
 if __name__ == '__main__':
