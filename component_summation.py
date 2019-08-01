@@ -2,7 +2,8 @@
 
 """Plot PyBDSF componets for each source."""
 
-import sys
+# import os
+# import sys
 import matplotlib.pylab as pl
 import pandas as pd
 import aplpy
@@ -188,15 +189,16 @@ def plot_ellipses(names, ras, decs, peaks, my_dir, ellipses):
                 facecolor = tuple((col[0], col[1], col[2], 0.5))
                 image.show_ellipses(ra, dec, maj * 2, min * 2, pa + 90,
                                     facecolor=facecolor,
-                                    edgecolor='white')
+                                    edgecolor=col)
 
         image.show_colorscale(cmap='viridis', vmin=0, vmax=peak,
                               stretch='arcsinh')
-        image.save(f'{my_dir}images/component-summation/{name}.png')
-        import os
-        command = f'gpicview {my_dir}images/component-summation/{name}.png'
-        os.system(command)
-        sys.exit()
+        save = f'{my_dir}images/component-summation/{name}.png'
+        image.save(save)
+        print(f'{save} done.')
+        # command = f'gpicview {my_dir}images/component-summation/{name}.png'
+        # os.system(command)
+        # sys.exit()
 
 
 def do_the_math():
