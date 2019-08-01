@@ -240,6 +240,9 @@ def main():
     plot_ellipses(names=names, ras=ras, decs=decs, peaks=peaks, my_dir=my_dir,
                   ellipses=ellipses)
 
+    # NOTE could make it so it plots the smallest flux first, by sorting the
+    #      ellipses by the fraction flux
+
     do_the_math()
 
 
