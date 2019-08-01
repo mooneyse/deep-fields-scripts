@@ -193,6 +193,9 @@ def plot_ellipses(names, ras, decs, peaks, my_dir, ellipses):
                               stretch='arcsinh')
         image.save(f'{my_dir}images/component-summation/{name}.png')
         print(f'Done! View it now: gpicview {my_dir}/{name}.png')
+        import os
+        command = f'gpicview {my_dir}/{name}.png'
+        os.system(command)
         sys.exit()
 
 
