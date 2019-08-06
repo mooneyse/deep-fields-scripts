@@ -188,7 +188,7 @@ def plot_ellipses(names, ras, decs, peaks, my_dir, ellipses):
         image.recenter(ra, dec, radius=1 / 60)
         for n, _, flux, ra, dec, maj, min, pa in ellipses:
             if name == n:
-                col = pl.cm.Greys(int(255 * (1 - flux)))
+                col = pl.cm.Greys(int(255 * flux))
                 facecolor = tuple((col[0], col[1], col[2], 0.5))
                 image.show_ellipses(ra, dec, maj * 2, min * 2, pa + 90,
                                     facecolor=facecolor,
