@@ -32,7 +32,7 @@ def get_ellipses(my_dir):
     """
     csv = my_dir + 'catalogues/deep.fields.29.07.2019.gaul.csv'
     df = pd.read_csv(csv)
-    df = df.sort_values('Total_flux_2')
+    df = df.sort_values('Total_flux_2', ascending=False)
 
     source_name = df['Source name']
     ra = df['RA_2']
@@ -182,17 +182,18 @@ def plot_ellipses(names, ras, decs, peaks, my_dir, ellipses):
     None.
     """
     for name, ra, dec, peak in zip(names, ras, decs, peaks):
-        print(f"Imaging {name}.")
+        print(f'Imaging {name}.')
         field_file = fits_file(name=name, ra=ra, my_dir=my_dir)
         image = aplpy.FITSFigure(field_file)
         image.recenter(ra, dec, radius=1 / 60)
         for n, _, flux, ra, dec, maj, min, pa in ellipses:
             if name == n:
-                col = pl.cm.Greys(int(255 * flux))
-                facecolor = tuple((col[0], col[1], col[2], 0.5))
+                col = pl.cm.autumn(int(255 * flux))
+                facecolor = tuple((col[0], col[1], col[2], 0.25))
+                edgecolor = tuple((col[0], col[1], col[2], 0.5))
                 image.show_ellipses(ra, dec, maj * 2, min * 2, pa + 90,
                                     facecolor=facecolor,
-                                    edgecolor=col)
+                                    edgecolor=edgecolor)
 
         image.show_colorscale(cmap='viridis', vmin=0, vmax=peak,
                               stretch='arcsinh')
