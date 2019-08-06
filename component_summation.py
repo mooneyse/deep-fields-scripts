@@ -2,6 +2,8 @@
 
 """Plot PyBDSF componets for each source."""
 
+import matplotlib
+matplotlib.use('Agg')
 # import os
 # import sys
 import matplotlib.pylab as pl
@@ -30,6 +32,7 @@ def get_ellipses(my_dir):
     """
     csv = my_dir + 'catalogues/deep.fields.29.07.2019.gaul.csv'
     df = pd.read_csv(csv)
+    df = df.sort_values('Total_flux_2')
 
     source_name = df['Source name']
     ra = df['RA_2']
