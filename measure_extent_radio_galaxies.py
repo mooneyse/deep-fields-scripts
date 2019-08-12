@@ -20,14 +20,6 @@ __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '06 August 2019'
 
 
-def abline(slope, intercept):
-    """Plot a line from slope and intercept."""
-    axes = plt.gca()
-    x_vals = np.array(axes.get_xlim())
-    y_vals = intercept + slope * x_vals
-    plt.plot(x_vals, y_vals, '--')
-
-
 def manual_mask(name, data):
     """Some ad hoc adjustments to a few sources, made after visual inspection.
 
@@ -235,9 +227,9 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
             except Exception:  # raise other errors as usual
                 raise
 
-    d[d == -3.141592] = np.nan
+    d[d == -3.141592] = np.nan  # have to do it this way to avoid a pattern
     d = manual_mask(name=source_name, data=d)
-    d = d / d
+    d = d / d  # scale to unity
     rows, cols = d.shape
     good_cells = []
 
@@ -265,7 +257,7 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     asec_max = my_max * 1.5  # 1.5" per pixel
     centre = ((max_y1 + max_y2) / 2, (max_x1 + max_x2) / 2)
 
-    slope = (max_y2 - max_y1) / (max_x2 - max_x1)
+    # slope = (max_y2 - max_y1) / (max_x2 - max_x1)
 
     # for the good cells, find the distance from it to the point on the line
     # we assume we are looking down the line of longest length and the source
@@ -293,16 +285,16 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     asec_width = (my_max_width + np.abs(my_min_width)) * 1.5  # 1.5" per pixel
 
     fig = plt.imshow(d, vmin=0, vmax=np.nanmax(d), origin='lower',
-                     cmap='Greys')  # ,norm=DS9Normalize(stretch='arcsinh'))
+                     cmap='Greys')
     # fig = plt.imshow(d, vmin=0, vmax=np.nanmax(d), origin='lower',
     #                  norm=DS9Normalize(stretch='arcsinh'))
     plt.colorbar()
     fig.axes.get_xaxis().set_visible(False)
     fig.axes.get_yaxis().set_visible(False)
-    circle = plt.Circle(centre, my_max / 2, color='r', fill=False, alpha=0.5,
-                        lw=2)
-    fig = plt.gcf()
-    ax = fig.gca()
+    # circle = plt.Circle(centre, my_max / 2, color='r', fill=False, alpha=0.5,
+    #                     lw=2)
+    # fig = plt.gcf()
+    # ax = fig.gca()
     # ax.add_artist(circle)
 
     plt.plot([max_y1, max_y2], [max_x1, max_x2], color='red', alpha=0.5, lw=2)
@@ -311,17 +303,17 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     plt.plot([width_y_min], [width_x_min], marker='o', markersize=10,
              color='red', alpha=0.5)
 
-    theta = math.radians(90)
-    cx = (max_x1 + max_x2) / 2
-    cy = (max_y1 + max_y2) / 2
-    x1_ = (((max_x1 - cx) * math.cos(theta) + (max_y1 - cy) * math.sin(theta))
-           + cx)
-    x2_ = (((max_x2 - cx) * math.cos(theta) + (max_y2 - cy) * math.sin(theta))
-           + cx)
-    y1_ = ((-(max_x1 - cx) * math.sin(theta) + (max_y1 - cy) * math.cos(theta))
-           + cy)
-    y2_ = ((-(max_x2 - cx) * math.sin(theta) + (max_y2 - cy) * math.cos(theta))
-           + cy)
+    # theta = math.radians(90)
+    # cx = (max_x1 + max_x2) / 2
+    # cy = (max_y1 + max_y2) / 2
+    # x1_ = (((max_x1 - cx) * math.cos(theta) + (max_y1 - cy) *
+    #        math.sin(theta)) + cx)
+    # x2_ = (((max_x2 - cx) * math.cos(theta) + (max_y2 - cy) *
+    #        math.sin(theta)) + cx)
+    # y1_ = ((-(max_x1 - cx) * math.sin(theta) + (max_y1 - cy) *
+    #        math.cos(theta)) + cy)
+    # y2_ = ((-(max_x2 - cx) * math.sin(theta) + (max_y2 - cy) *
+    #        math.cos(theta)) + cy)
 
     # plt.plot([y1_, y2_], [x1_, x2_], color='green', alpha=0.5, lw=2)
     # plt.plot([(max_y1 + max_y2) / 2], [(max_x1 + max_x2) / 2], marker='o',
