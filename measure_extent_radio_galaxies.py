@@ -111,6 +111,86 @@ def manual_mask(name, data):
         d[:, :37] = np.nan
         d[:, 83:] = np.nan
 
+    if name == 'ILTJ125805.10+541704.4':
+        d[97:, :] = np.nan
+        d[:, 88:] = np.nan
+        d[:, :20] = np.nan
+
+    if name == 'ILTJ125840.41+534935.5':
+        d[80:, :] = np.nan
+
+    if name == 'ILTJ125852.58+555527.3':
+        d[15:42, :18] = np.nan
+
+    if name == 'ILTJ125959.20+560735.0':
+        d[100:, :] = np.nan
+        d[:, 80:] = np.nan
+
+    if name == 'ILTJ130005.50+551315.1':
+        d[:, :14] = np.nan
+
+    if name == 'ILTJ130018.09+545048.2':
+        d[:, 80:] = np.nan
+
+    if name == 'ILTJ130057.57+542654.6':
+        d[29:37, 50:60] = np.nan
+
+    if name == 'ILTJ130102.49+561003.6':
+        d[100:, :] = np.nan
+        d[:30, :] = np.nan
+        d[61:68, 80:87] = np.nan
+
+    if name == 'ILTJ130112.93+550410.5':
+        d[90:, :] = np.nan
+
+    if name == 'ILTJ130138.23+551918.4':
+        d[:, 83:] = np.nan
+
+    if name == 'ILTJ130148.82+544723.9':
+        d[114:, :] = np.nan
+
+    if name == 'ILTJ130152.93+555557.4':
+        d[:, :30] = np.nan
+        d[:, 96:] = np.nan
+
+    if name == 'ILTJ130159.04+534548.8':
+        d[:34, :] = np.nan
+        d[103:, :] = np.nan
+
+    if name == 'ILTJ130528.93+561918.9':
+        d[:, 90:] = np.nan
+
+    if name == 'ILTJ130605.63+555127.6':
+        d[:, 96:] = np.nan
+
+    if name == 'ILTJ130634.72+553657.7':
+        d[107:, :] = np.nan
+
+    if name == 'ILTJ130804.04+550835.4':
+        d[:, :46] = np.nan
+        d[:, 70:] = np.nan
+
+    if name == 'ILTJ130821.80+562744.1':
+        d[:, :23] = np.nan
+        d[:, 100:] = np.nan
+
+    if name == 'ILTJ130857.14+542915.9':
+        d[:, 98:] = np.nan
+        d[:, :23] = np.nan
+
+    if name == 'ILTJ130907.51+545520.4':
+        d[:, 96:] = np.nan
+
+    if name == 'ILTJ130926.29+534820.0':
+        d[54:57, 76:79] = np.nan
+        d[44:53, 69:74] = np.nan
+
+    if name == 'ILTJ131115.53+534356.8':
+        d[101:, :] = np.nan
+
+    if name == 'ILTJ131236.04+535524.7':
+        d[:, 83:] = np.nan
+
     return data
 
 
@@ -131,8 +211,13 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     hdu = fits.open(field)[0]
     wcs = WCS(hdu.header, naxis=2)
     sky_position = SkyCoord(ra, dec, unit='deg')
+    size = [3, 3]
+
+    if source_name == 'ILTJ130140.02+540825.9':
+        size = [4, 4]  # needs a bigger cut out
+
     cutout = Cutout2D(np.squeeze(hdu.data), sky_position,
-                      size=[3, 3] * u.arcmin, wcs=wcs)
+                      size=size * u.arcmin, wcs=wcs)
 
     d = cutout.data
     d[d < threshold] = np.nan
@@ -147,7 +232,7 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
                     d[x, y] = -3.141592  # can use any number
             except IndexError:
                 print(f'IndexError encountered for {source_name}.')
-            except:
+            except Exception:  # raise other errors as usual
                 raise
 
     d[d == -3.141592] = np.nan
@@ -250,5 +335,5 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     print(f'{source_name} {asec_max} {asec_width} {threshold * 1000}')
 
     i += 1
-    if i > 8:
-        sys.exit()
+    # if i > 8:
+    #     sys.exit()
