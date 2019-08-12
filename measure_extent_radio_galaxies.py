@@ -96,6 +96,21 @@ def manual_mask(name, data):
     if name == '5BZQJ1604+5714':
         data[38:49, 22:30] = np.nan
 
+    if name == 'ILTJ125524.94+544942.7':
+        data[90:, :] = np.nan
+        data[:35, :] = np.nan
+
+    if name == 'ILTJ125544.98+553748.6':
+        data[:35, :] = np.nan
+        data[63:71, 32:39] = np.nan
+
+    if name == 'ILTJ125624.63+552823.7':
+        data[:, 88:] = np.nan
+
+    if name == 'ILTJ125755.66+541155.1':
+        d[:, :37] = np.nan
+        d[:, 83:] = np.nan
+
     return data
 
 
@@ -126,12 +141,18 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     # set inside elements to nan to speed up the calculations
     for x in range(0, d.shape[0]):
         for y in range(0, d.shape[0]):
-            if (np.isfinite(d[x - 1, y]) and np.isfinite(d[x + 1, y]) and
-               np.isfinite(d[x, y - 1]) and np.isfinite(d[x, y + 1])):
-                d[x, y] = -3.141592  # can use any number
+            try:
+                if (np.isfinite(d[x - 1, y]) and np.isfinite(d[x + 1, y]) and
+                   np.isfinite(d[x, y - 1]) and np.isfinite(d[x, y + 1])):
+                    d[x, y] = -3.141592  # can use any number
+            except IndexError:
+                print(f'IndexError encountered for {source_name}.')
+            except:
+                raise
 
     d[d == -3.141592] = np.nan
-    # d = manual_mask(name=source_name, data=d)
+    d = manual_mask(name=source_name, data=d)
+    d = d / d
     rows, cols = d.shape
     good_cells = []
 
@@ -184,9 +205,10 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     width_y_max = width_y[widths.argmax()]
     width_x_min = width_x[widths.argmin()]
     width_y_min = width_y[widths.argmin()]
+    asec_width = (my_max_width + np.abs(my_min_width)) * 1.5  # 1.5" per pixel
 
-    fig = plt.imshow(d_plot, vmin=0, vmax=np.nanmax(d), origin='lower',
-                     norm=DS9Normalize(stretch='arcsinh'))
+    fig = plt.imshow(d, vmin=0, vmax=np.nanmax(d), origin='lower',
+                     cmap='Greys')  # ,norm=DS9Normalize(stretch='arcsinh'))
     # fig = plt.imshow(d, vmin=0, vmax=np.nanmax(d), origin='lower',
     #                  norm=DS9Normalize(stretch='arcsinh'))
     plt.colorbar()
@@ -221,13 +243,12 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     #          color='red', alpha=0.5)
 
     plt.title(f'{source_name}\n5\u03C3 = {threshold * 1000:.3f} mJy; d = ' +
-              f'{asec_max:.1f}"')
+              f'width = {asec_width:.1f}"')
     plt.show()
     # plt.savefig(f'{my_dir}../images/extention/{source_name}.png')
     plt.clf()
-    print(f'{source_name} {asec_max} {threshold * 1000}')
-    print(f'{my_max_width}')
+    print(f'{source_name} {asec_max} {asec_width} {threshold * 1000}')
 
     i += 1
-    if i > 2:
+    if i > 8:
         sys.exit()
