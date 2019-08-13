@@ -2,7 +2,6 @@
 
 """Measure the extent of sources."""
 
-import sys
 import numpy as np
 import pandas as pd
 import math
@@ -13,7 +12,6 @@ from astropy.io import fits
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 from ds9norm import DS9Normalize
-from scipy import ndimage
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
@@ -35,59 +33,6 @@ def manual_mask(name, data):
     array
         Values with the manual masking done.
     """
-    if name == '5BZQJ1422+3223':
-        d[:, 70:] = np.nan
-        d[20:23, 51:54] = np.nan
-        d[42:45, 58:60] = np.nan
-
-    if name == '5BZBJ1426+3404':
-        data[:29, :] = np.nan
-        data[63:, :] = np.nan
-
-    if name == '5BZQJ1429+3529':
-        data[:, :20] = np.nan
-        data[:26, :] = np.nan
-
-    if name == '5BZQJ1435+3353':
-        data[:, :15] = np.nan
-        data[:, 47:] = np.nan
-
-    if name == '5BZQJ1437+3618':
-        data[:, :23] = np.nan
-
-    if name == '5BZQJ1437+3519':
-        data[:, 65:] = np.nan
-
-    if name == '5BZBJ1558+5625':
-        data[62:, :] = np.nan
-
-    if name == '5BZBJ1605+5421':
-        data[:, 60:] = np.nan
-        data[:, :29] = np.nan
-        data[66:, :] = np.nan
-        data[:31, :] = np.nan
-
-    if name == '5BZQJ1606+5405':
-        data[:, :20] = np.nan
-        data[:, 62:] = np.nan
-
-    if name == '5BZQJ1608+5613':
-        data[:30, :] = np.nan
-        data[:, 47:] = np.nan
-        data[46:54, 43:47] = np.nan
-
-    if name == '5BZQJ1619+5256':
-        data[77:, :] = np.nan
-        data[:32, :] = np.nan
-        data[43:47, 46:54] = np.nan
-
-    if name == '5BZBJ1037+5711':
-        data[:25, :] = np.nan
-        data[54:59, 37:44] = np.nan
-
-    if name == '5BZQJ1604+5714':
-        data[38:49, 22:30] = np.nan
-
     if name == 'ILTJ125524.94+544942.7':
         data[90:, :] = np.nan
         data[:35, :] = np.nan
@@ -161,6 +106,7 @@ def manual_mask(name, data):
     if name == 'ILTJ130804.04+550835.4':
         d[:, :46] = np.nan
         d[:, 70:] = np.nan
+        d[:13, :] = np.nan
 
     if name == 'ILTJ130821.80+562744.1':
         d[:, :23] = np.nan
@@ -183,53 +129,142 @@ def manual_mask(name, data):
     if name == 'ILTJ131236.04+535524.7':
         d[:, 83:] = np.nan
 
+    if name == 'ILTJ125757.12+554224.1':
+        d[:, :40] = np.nan
+        d[:, 71:] = np.nan
+
+    if name == 'ILTJ125840.51+534935.5':
+        d[79:, :] = np.nan
+        # d[:45, :] = np.nan
+        d[:, 70:] = np.nan
+
+    if name == 'ILTJ125852.58+555527.3':
+        d[:, :21] = np.nan
+        d[71:, :] = np.nan
+
+    if name == 'ILTJ130005.50+551315.1':
+        d[:, :32] = np.nan
+
+    if name == 'ILTJ130112.93+550410.5':
+        d[:33, :] = np.nan
+
+    if name == 'ILTJ130148.82+544723.9':
+        d[:50, :] = np.nan
+
+    if name == 'ILTJ130331.44+534400.9':
+        d[:, :43] = np.nan
+        d[67:85, 63:88] = np.nan
+        d[71:, :] = np.nan
+        d[:, 72:] = np.nan
+        d[65:85, 66:88] = np.nan
+
+    if name == 'ILTJ130441.11+551952.7':
+        d[:, :39] = np.nan
+        d[:, 73:] = np.nan
+        d[:37, :] = np.nan
+
+    if name == 'ILTJ130531.20+535432.3':
+        d[:, :39] = np.nan
+        d[:, 97:] = np.nan
+        d[:30, :] = np.nan
+        d[:30, :] = np.nan
+        d[45:53, 55:64] = np.nan
+
+    if name == 'ILTJ130605.63+555127.6':
+        d[:, :41] = np.nan
+
+    if name == 'ILTJ130634.72+553657.7':
+        d[73:85, 25:42] = np.nan
+        d[30:41, 43:56] = np.nan
+
+    if name == 'ILTJ130638.74+541448.8':
+        d[:, :22] = np.nan
+        d[:, 91:] = np.nan
+        d[:45, :] = np.nan
+
+    if name == 'ILTJ130749.04+545120.0':
+        d[:, :11] = np.nan
+        d[91:, :] = np.nan
+        d[:42, :] = np.nan
+        d[42:51, 54:63] = np.nan
+
+    if name == 'ILTJ130804.04+550836.4':
+        d[:17, :] = np.nan
+
+    if name == 'ILTJ130857.14+542915.9':
+        d[58:68, 35:45] = np.nan
+        d[66:77, 35:52] = np.nan
+        d[:, 71:] = np.nan
+        d[40:49, 60:76] = np.nan
+
+    if name == 'ILTJ130926.29+534820.0':
+        d[65:77, 42:55] = np.nan
+
+    if name == 'ILTJ130331.30+540024.1':
+        d[174:, :] = np.nan
+        d[:, :50] = np.nan
+
     return data
 
 
-my_dir = '/home/sean/Downloads/'  # /data5/sean
-df = pd.read_csv(f'{my_dir}fr-i-fr-ii-mingo-ldr1.csv')  # load data
-df = df[df['Mosaic_ID'] == 'P196+55']  # just doing P196+55 for now
-fields = [f'{my_dir}{m}-mosaic.fits' for m in df['Mosaic_ID']]
+my_dir = '/data5/sean/deep-fields/catalogues/'  # mnt/closet
+df = pd.read_csv(f'{my_dir}radio.galaxies.ldr1.csv')  # load data
+# df = df[df['Mosaic_ID'] == 'P196+55']  # just doing P196+55 for now
+fields = [f'/data1/lotss-data/{m}-mosaic.fits' for m in df['Mosaic_ID']]
 thresholds = 5 * df['Isl_rms'] / 1000  # converting to jansky
 plt.figure(figsize=(8, 8))
 i = 0
 
-for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
-                                                  df['RA_1'],
-                                                  df['DEC_1'], fields,
-                                                  thresholds):
-    # if source_name != '5BZQJ1604+5714':  # for testing one source
+for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
+     dd, lm_size, lm_flux) in zip(df['Source_Name_1'], df['RA_1'],
+                                  df['DEC_1'], fields, thresholds,
+                                  df['FR1'], df['FR2'], df['z_best'],
+                                  df['NAT'], df['WAT'], df['D-D'],
+                                  df['LM_dec_size'], df['LM_Flux']):
+
+    source_type = 'FR-I' if fri else 'FR-II'  # already removed small sources
+
+    # if source_name != 'ILTJ130804.04+550835.4':  # for testing one source
     #     continue
-    hdu = fits.open(field)[0]
+
+    try:
+        hdu = fits.open(field)[0]
+    except FileNotFoundError:  # fits might have different name
+        print(f'{field} does not exist.')
+        continue
+
     wcs = WCS(hdu.header, naxis=2)
     sky_position = SkyCoord(ra, dec, unit='deg')
-    size = [3, 3]
+    s = math.ceil((lm_size * 2) / 60)
+    size = [3, 3] if field[-19:-5] == 'P196+55-mosaic' else [s, s]
 
+    # some sources need a bigger cutout
     if source_name == 'ILTJ130140.02+540825.9':
-        size = [4, 4]  # needs a bigger cut out
+        size = [4, 4]
+    elif source_name == 'ILTJ130331.30+540024.1':
+        size = [6, 6]
 
     cutout = Cutout2D(np.squeeze(hdu.data), sky_position,
                       size=size * u.arcmin, wcs=wcs)
 
     d = cutout.data
     d[d < threshold] = np.nan
-    d_plot = d[:]
 
     # set inside elements to nan to speed up the calculations
-    for x in range(0, d.shape[0]):
-        for y in range(0, d.shape[0]):
-            try:
-                if (np.isfinite(d[x - 1, y]) and np.isfinite(d[x + 1, y]) and
-                   np.isfinite(d[x, y - 1]) and np.isfinite(d[x, y + 1])):
-                    d[x, y] = -3.141592  # can use any number
-            except IndexError:
-                print(f'IndexError encountered for {source_name}.')
-            except Exception:  # raise other errors as usual
-                raise
-
-    d[d == -3.141592] = np.nan  # have to do it this way to avoid a pattern
+    # for x in range(0, d.shape[0]):
+    #     for y in range(0, d.shape[0]):
+    #         try:
+    #             if (np.isfinite(d[x - 1, y]) and np.isfinite(d[x + 1, y]) and
+    #                np.isfinite(d[x, y - 1]) and np.isfinite(d[x, y + 1])):
+    #                 d[x, y] = -3.141592  # can use any number
+    #         except IndexError:
+    #             print(f'IndexError encountered for {source_name}.')
+    #         except Exception:  # raise other errors as usual
+    #             raise
+    #
+    # d[d == -3.141592] = np.nan  # have to do it this way to avoid a pattern
     d = manual_mask(name=source_name, data=d)
-    d = d / d  # scale to unity
+    # d = d / d  # scale to unity
     rows, cols = d.shape
     good_cells = []
 
@@ -257,12 +292,9 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     asec_max = my_max * 1.5  # 1.5" per pixel
     centre = ((max_y1 + max_y2) / 2, (max_x1 + max_x2) / 2)
 
-    # slope = (max_y2 - max_y1) / (max_x2 - max_x1)
-
-    # for the good cells, find the distance from it to the point on the line
-    # we assume we are looking down the line of longest length and the source
-    # is flat in the plane of the sky
-    # https://stackoverflow.com/a/52756183/6386612
+    # for good cells find the distance from it to the point on the line, we
+    # assume we look down the longest line and the source is flat in the plane
+    # of the sky https://stackoverflow.com/a/52756183/6386612
 
     p1 = np.array([max_x1, max_y1])
     p2 = np.array([max_x2, max_y2])
@@ -284,18 +316,14 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     width_y_min = width_y[widths.argmin()]
     asec_width = (my_max_width + np.abs(my_min_width)) * 1.5  # 1.5" per pixel
 
-    fig = plt.imshow(d, vmin=0, vmax=np.nanmax(d), origin='lower',
-                     cmap='Greys')
     # fig = plt.imshow(d, vmin=0, vmax=np.nanmax(d), origin='lower',
-    #                  norm=DS9Normalize(stretch='arcsinh'))
+    #                  cmap='Greys')
+    fig = plt.imshow(d, vmin=0, vmax=np.nanmax(d), origin='lower',
+                     norm=DS9Normalize(stretch='arcsinh'))
+
     plt.colorbar()
     fig.axes.get_xaxis().set_visible(False)
     fig.axes.get_yaxis().set_visible(False)
-    # circle = plt.Circle(centre, my_max / 2, color='r', fill=False, alpha=0.5,
-    #                     lw=2)
-    # fig = plt.gcf()
-    # ax = fig.gca()
-    # ax.add_artist(circle)
 
     plt.plot([max_y1, max_y2], [max_x1, max_x2], color='red', alpha=0.5, lw=2)
     plt.plot([width_y_max], [width_x_max], marker='o', markersize=10,
@@ -303,29 +331,27 @@ for source_name, ra, dec, field, threshold in zip(df['Source_Name_1'],
     plt.plot([width_y_min], [width_x_min], marker='o', markersize=10,
              color='red', alpha=0.5)
 
-    # theta = math.radians(90)
-    # cx = (max_x1 + max_x2) / 2
-    # cy = (max_y1 + max_y2) / 2
-    # x1_ = (((max_x1 - cx) * math.cos(theta) + (max_y1 - cy) *
-    #        math.sin(theta)) + cx)
-    # x2_ = (((max_x2 - cx) * math.cos(theta) + (max_y2 - cy) *
-    #        math.sin(theta)) + cx)
-    # y1_ = ((-(max_x1 - cx) * math.sin(theta) + (max_y1 - cy) *
-    #        math.cos(theta)) + cy)
-    # y2_ = ((-(max_x2 - cx) * math.sin(theta) + (max_y2 - cy) *
-    #        math.cos(theta)) + cy)
+    my_string = ''
+    if nat:
+        my_string += 'NAT '
+    elif wat:
+        my_string += 'WAT '
+    if dd:
+        my_string += 'D-D '
 
-    # plt.plot([y1_, y2_], [x1_, x2_], color='green', alpha=0.5, lw=2)
-    # plt.plot([(max_y1 + max_y2) / 2], [(max_x1 + max_x2) / 2], marker='o',
-    #          color='red', alpha=0.5)
-
-    plt.title(f'{source_name}\n5\u03C3 = {threshold * 1000:.3f} mJy; d = ' +
-              f'width = {asec_width:.1f}"')
-    plt.show()
-    # plt.savefig(f'{my_dir}../images/extention/{source_name}.png')
+    plt.title(f'{source_name}\n{source_type}; {my_string}5\u03C3 = ' +
+              f'{threshold * 1000:.3f} mJy; width = {asec_width:.1f}"')
+    # plt.show()
+    plt.savefig(f'{my_dir}../images/extention-radio-galaxies/' +
+                f'{source_name}.png')
     plt.clf()
-    print(f'{source_name} {asec_max} {asec_width} {threshold * 1000}')
+    print(f'{source_name} {source_type} {asec_max} {asec_width} ' +
+          f'{threshold * 1000} {redshift} {nat} {wat} {dd} {lm_size} ' +
+          f'{lm_flux}')
 
-    i += 1
-    # if i > 8:
+    # build clean sample on visual inspection
+
+    # i += 1
+    # if i > 1:
+    #     import sys
     #     sys.exit()
