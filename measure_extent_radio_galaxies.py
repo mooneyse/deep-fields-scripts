@@ -290,7 +290,11 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
             y2s.append(y2)
 
     distances = np.array(distances)
-    my_max = np.max(distances)
+    try:
+        my_max = np.max(distances)
+    except ValueError:
+        print(f'Failed for {source_name}.')
+        continue
     max_x1 = x1s[distances.argmax()]
     max_x2 = x2s[distances.argmax()]
     max_y1 = y1s[distances.argmax()]
