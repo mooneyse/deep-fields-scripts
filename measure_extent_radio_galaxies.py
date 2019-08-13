@@ -345,9 +345,8 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
     plt.savefig(f'{my_dir}../images/extention-radio-galaxies/' +
                 f'{source_name}.png')
     plt.clf()
-    print(f'{source_name} {source_type} {asec_max} {asec_width} ' +
-          f'{threshold * 1000} {redshift} {nat} {wat} {dd} {lm_size} ' +
-          f'{lm_flux}')
+    print(f'{source_name} {source_type} {lm_flux} {lm_size} {asec_max} ' +
+          f'{asec_width} {threshold * 1000} {redshift} {nat} {wat} {dd}')
 
     # build clean sample on visual inspection
 
