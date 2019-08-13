@@ -2,6 +2,7 @@
 
 """Measure the extent of sources."""
 
+import os.path
 import numpy as np
 import pandas as pd
 import math
@@ -222,6 +223,11 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
                                   df['NAT'], df['WAT'], df['D-D'],
                                   df['LM_dec_size'], df['LM_Flux']):
 
+    save = f'{my_dir}../images/extention-radio-galaxies/{source_name}.png'
+    if os.path.exists(save):
+        print(f'{save} already exists.')
+        continue
+
     source_type = 'FR-I' if fri else 'FR-II'  # already removed small sources
 
     # if source_name != 'ILTJ130804.04+550835.4':  # for testing one source
@@ -342,8 +348,7 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
     plt.title(f'{source_name}\n{source_type}; {my_string}5\u03C3 = ' +
               f'{threshold * 1000:.3f} mJy; width = {asec_width:.1f}"')
     # plt.show()
-    plt.savefig(f'{my_dir}../images/extention-radio-galaxies/' +
-                f'{source_name}.png')
+    plt.savefig(save)
     plt.clf()
     results = (f'{source_name} {source_type} {lm_flux} {lm_size} {asec_max} ' +
                f'{asec_width} {threshold * 1000} {redshift} {nat} {wat} {dd}' +
