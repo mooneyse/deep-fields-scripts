@@ -2,6 +2,8 @@
 
 """Measure the extent of sources."""
 
+import matplotlib as mpl
+mpl.use('Agg')
 import os.path
 import numpy as np
 import pandas as pd
