@@ -346,7 +346,8 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
                 f'{source_name}.png')
     plt.clf()
     results = (f'{source_name} {source_type} {lm_flux} {lm_size} {asec_max} ' +
-               f'{asec_width} {threshold * 1000} {redshift} {nat} {wat} {dd}')
+               f'{asec_width} {threshold * 1000} {redshift} {nat} {wat} {dd}' +
+               '\n')
 
     with open(f'{my_dir}../results/extention-radio-galaxies.txt', 'a') as f:
         f.write(results)
