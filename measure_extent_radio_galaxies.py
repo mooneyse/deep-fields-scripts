@@ -380,7 +380,7 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
         f.write(results)
 
     i += 1
-    if i > 1:
+    if i > 100:
         import sys
         sys.exit()
     # build clean sample on visual inspection
