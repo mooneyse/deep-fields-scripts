@@ -241,6 +241,7 @@ def manual_mask(name, data):
 
     if name == 'ILTJ104747.59+521414.9':
         d[:, 77:] = np.nan
+        d[100:, :] = np.nan
 
     if name == 'ILTJ104843.46+482830.4':
         d[:, 48:] = np.nan
@@ -253,7 +254,6 @@ def manual_mask(name, data):
 
 my_dir = '/data5/sean/deep-fields/catalogues/'  # mnt/closet
 df = pd.read_csv(f'{my_dir}radio.galaxies.ldr1.csv')  # load data
-# df = df[df['Mosaic_ID'] == 'P196+55']  # just doing P196+55 for now
 fields = [f'/data1/lotss-data/{m}-mosaic.fits' for m in df['Mosaic_ID']]
 thresholds = 5 * df['Isl_rms'] / 1000  # converting to jansky
 plt.figure(figsize=(8, 8))
