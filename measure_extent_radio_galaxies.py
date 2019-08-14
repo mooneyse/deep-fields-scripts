@@ -214,8 +214,8 @@ def manual_mask(name, data):
         d[100:, :] = np.nan
 
     if name == 'ILTJ104611.79+522931.2':
-        d[:, :100] = np.nan
-        d[:, 220:] = np.nan
+        d[:, :130] = np.nan
+        d[:, 170:] = np.nan
 
     if name == 'ILTJ104647.32+531352.7':
         d[:, 100:] = np.nan
