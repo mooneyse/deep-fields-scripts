@@ -207,6 +207,47 @@ def manual_mask(name, data):
         d[174:, :] = np.nan
         d[:, :50] = np.nan
 
+    if name == 'ILTJ104416.22+524037.3':
+        [:, 120:] = np.nan
+
+    if name == 'ILTJ104438.12+521539.4':
+        [100:, :] = np.nan
+
+    if name == 'ILTJ104611.79+522931.2':
+        [:, :100] = np.nan
+        [:, 220:] = np.nan
+
+    if name == 'ILTJ104647.32+531352.7':
+        [:, 100:] = np.nan
+
+    if name == 'ILTJ104650.69+544807.2':
+        [:, :70] = np.nan
+        [:, 130:] = np.nan
+
+    if name == 'ILTJ104703.03+523023.4':
+        [:20, :] = np.nan
+        [70:, :] = np.nan
+
+    if name == 'ILTJ104713.87+530240.3':
+        [170:, :] = np.nan
+        [:100, :] = np.nan
+
+    if name == 'ILTJ104725.20+480043.4':
+        [:, :20] = np.nan
+
+    if name == 'ILTJ104733.68+530653.6':
+        [:60, :] = np.nan
+        [120:, :] = np.nan
+
+    if name == 'ILTJ104747.59+521414.9':
+        [:, 77:] = np.nan
+
+    if name == 'ILTJ104843.46+482830.4':
+        [:, 48:] = np.nan
+
+    if name == 'ILTJ104948.06+520821.8':
+        [:40, :] = np.nan
+
     return data
 
 
