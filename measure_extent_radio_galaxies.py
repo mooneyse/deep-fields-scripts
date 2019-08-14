@@ -353,6 +353,12 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
     plt.plot([width_y_min], [width_x_min], marker='o', markersize=10,
              color='red', alpha=0.5)
 
+    plt.minorticks_on()
+    # plt.gca().xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(10))
+    # plt.gca().yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(10))
+    plt.grid(which="both", linewidth=0.72, color="k")
+    plt.tick_params(which="minor", length=0)
+
     my_string = ''
     if nat:
         my_string += 'NAT '
