@@ -216,6 +216,15 @@ df = pd.read_csv(f'{my_dir}radio.galaxies.ldr1.csv')  # load data
 fields = [f'/data1/lotss-data/{m}-mosaic.fits' for m in df['Mosaic_ID']]
 thresholds = 5 * df['Isl_rms'] / 1000  # converting to jansky
 plt.figure(figsize=(8, 8))
+
+results_csv = f'{my_dir}../results/extention-radio-galaxies.csv'
+result_header = ('name,type,LM flux,LM size,length,width,threshold,z,WAT,' +
+                 'NAT,D-D\n')
+
+if not os.path.exists(results_csv):
+    with open(results_csv, 'a') as f:
+        f.write(result_header)
+
 i = 0
 
 for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
@@ -297,6 +306,7 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
     except ValueError:
         print(f'Failed for {source_name}.')
         continue
+
     max_x1 = x1s[distances.argmax()]
     max_x2 = x2s[distances.argmax()]
     max_y1 = y1s[distances.argmax()]
@@ -334,8 +344,8 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
                      norm=DS9Normalize(stretch='arcsinh'))
 
     plt.colorbar()
-    fig.axes.get_xaxis().set_visible(False)
-    fig.axes.get_yaxis().set_visible(False)
+    # fig.axes.get_xaxis().set_visible(False)
+    # fig.axes.get_yaxis().set_visible(False)
 
     plt.plot([max_y1, max_y2], [max_x1, max_x2], color='red', alpha=0.5, lw=2)
     plt.plot([width_y_max], [width_x_max], marker='o', markersize=10,
@@ -356,16 +366,15 @@ for (source_name, ra, dec, field, threshold, fri, frii, redshift, nat, wat,
     # plt.show()
     plt.savefig(save)
     plt.clf()
-    results = (f'{source_name} {source_type} {lm_flux} {lm_size} {asec_max} ' +
-               f'{asec_width} {threshold * 1000} {redshift} {nat} {wat} {dd}' +
+    results = (f'{source_name},{source_type},{lm_flux},{lm_size},{asec_max},' +
+               f'{asec_width},{threshold * 1000},{redshift},{nat},{wat},{dd}' +
                '\n')
 
-    with open(f'{my_dir}../results/extention-radio-galaxies.txt', 'a') as f:
+    with open(results_csv, 'a') as f:
         f.write(results)
 
+    i += 1
+    if i > 1:
+        import sys
+        sys.exit()
     # build clean sample on visual inspection
-
-    # i += 1
-    # if i > 1:
-    #     import sys
-    #     sys.exit()
