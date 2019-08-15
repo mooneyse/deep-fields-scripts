@@ -416,16 +416,19 @@ def manual_mask(name, data):
 
 
 def measure_extent_radio_galaxies(
-        my_dir='/data5/sean/deep-fields/catalogues/'):
+        my_dir='/data5/sean/deep-fields/catalogues/', nah=False):
     """Measure the size of radio galaxies.
     """
+
+    results_csv = f'{my_dir}../results/extention-radio-galaxies.csv'
+    if nah:
+        return results_csv  # do not do anything
 
     df = pd.read_csv(f'{my_dir}radio.galaxies.ldr1.csv')  # load data
     fields = [f'/data1/lotss-data/{m}-mosaic.fits' for m in df['Mosaic_ID']]
     thresholds = 5 * df['Isl_rms'] / 1000  # converting to jansky
     plt.figure(figsize=(8, 8))
 
-    results_csv = f'{my_dir}../results/extention-radio-galaxies.csv'
     result_header = ('Name,Class,LM flux (mJy),LM size ("),Width ("),Width' +
                      ' (kpc),5 * rms (mJy),Redshift,NAT,WAT,D-D\n')
 
@@ -446,7 +449,7 @@ def measure_extent_radio_galaxies(
 
         save = f'{my_dir}../images/extention-radio-galaxies/{source_name}.png'
         if os.path.exists(save):
-            print(f'{save} already exists.')
+            print(f'{save} already exists so it is being skipped.')
             continue
 
         if source_name in skip_list:
@@ -516,9 +519,9 @@ def measure_extent_radio_galaxies(
         asec_max = my_max * 1.5  # 1.5" per pixel
 
         # this removes highly curved sources
-        if lm_size / asec_max > 1.75 or asec_max / lm_size > 1.75:
-            print(f'{source_name} is too curved so it is being skipped.')
-            continue
+        # if lm_size / asec_max > 1.75 or asec_max / lm_size > 1.75:
+        #     print(f'{source_name} is too curved so it is being skipped.')
+        #     continue
 
         # for good cells find the distance from it to the point on the line, we
         # assume we look down the longest line and the source is flat in the
@@ -590,7 +593,7 @@ def measure_extent_radio_galaxies(
 
 
 def main():
-    measure_extent_radio_galaxies()
+    measure_extent_radio_galaxies(nah=True)
 
 
 if __name__ == '__main__':
