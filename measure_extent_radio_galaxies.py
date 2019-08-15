@@ -593,7 +593,7 @@ def measure_extent_radio_galaxies(
 
 
 def main():
-    measure_extent_radio_galaxies(nah=True)
+    measure_extent_radio_galaxies(nah=False)
 
 
 if __name__ == '__main__':
