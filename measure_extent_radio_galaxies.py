@@ -116,6 +116,66 @@ def manual_mask(name, data):
     array
         Values with the manual masking done.
     """
+    if name == 'ILTJ105351.79+531021.2':
+        data[:, 60:] = np.nan
+        data[:33, 52:] = np.nan
+
+    if name == '105524.28+475759.0':
+        data[:, :30] = np.nan
+
+    if name == '105536.20+525027.5':
+        data[:10, :] = np.nan
+
+    if name == '105540.31+463441.3':
+        data[:, 125:] = np.nan
+        data[:75, :] = np.nan
+
+    if name == '105542.06+490457.2':
+        data[:, :75] = np.nan
+        data[:55, :] = np.nan
+
+    if name == '105543.46+525919.9':
+        data[:, :50] = np.nan
+        data[:, 125:] = np.nan
+
+    if name == '105554.31+465945.8':
+        data[:, :44] = np.nan
+        data[80:, :] = np.nan
+        data[:43, :] = np.nan
+        data[:, 76:] = np.nan
+
+    if name == '105555.61+534401.2':
+        data[80:, :] = np.nan
+        data[:20, :] = np.nan
+
+    if name == '105602.14+545020.7':
+        data[120:, :] = np.nan
+
+    if name == '105624.19+482656.0':
+        data[:20, :] = np.nan
+
+    if name == '105628.21+484834.2':
+        data[:50, :] = np.nan
+        data[150:, :] = np.nan
+
+    if name == '105715.33+484108.6':
+        data[440:, :] = np.nan
+        data[:120, :] = np.nan
+        data[:, 440:] = np.nan
+        data[:, :240] = np.nan
+
+    if name == '105721.73+531418.5':
+        data[:, :100] = np.nan
+        data[:, 150:] = np.nan
+
+    if name == '105728.34+474924.0':
+        data[220:, :] = np.nan
+        data[:100, :] = np.nan
+        data[:, 220:] = np.nan
+
+    if name == '105737.65+555113.5':
+        data[:, 150:] = np.nan
+
     if name == 'ILTJ125524.94+544942.7':
         data[90:, :] = np.nan
         data[:35, :] = np.nan
@@ -456,8 +516,8 @@ def measure_extent_radio_galaxies(
             print(f'{source_name} is too complicated so it is being skipped.')
             continue
 
-        source_type = 'FR-I' if fri else 'FR-II'  # already removed small
-        # sources and ambiguous sources from the sample
+        # already removed small sources and ambiguous sources from the sample
+        source_type = 'FR-I' if fri else 'FR-II'
 
         # if source_name != 'ILTJ130804.04+550835.4':  # for testing one source
         #     continue
@@ -506,17 +566,17 @@ def measure_extent_radio_galaxies(
                 y2s.append(y2)
 
         distances = np.array(distances)
-        try:
-            my_max = np.max(distances)
-        except ValueError:
-            print(f'Failed for {source_name}.')
-            continue
+        # try:
+        #     my_max = np.max(distances)
+        # except ValueError:
+        #     print(f'Failed for {source_name}.')
+        #     continue
 
         max_x1 = x1s[distances.argmax()]
         max_x2 = x2s[distances.argmax()]
         max_y1 = y1s[distances.argmax()]
         max_y2 = y2s[distances.argmax()]
-        asec_max = my_max * 1.5  # 1.5" per pixel
+        # asec_max = my_max * 1.5  # 1.5" per pixel
 
         # this removes highly curved sources
         # if lm_size / asec_max > 1.75 or asec_max / lm_size > 1.75:
@@ -585,11 +645,10 @@ def measure_extent_radio_galaxies(
         with open(results_csv, 'a') as f:
             f.write(results)
 
+        # build clean sample on visual inspection
         i += 1
         if i > 100:
-            import sys
-            sys.exit()
-        # build clean sample on visual inspection
+            return
 
 
 def main():
