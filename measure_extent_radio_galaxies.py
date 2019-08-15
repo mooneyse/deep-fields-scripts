@@ -450,7 +450,7 @@ def measure_extent_radio_galaxies(
             continue
 
         if source_name in skip_list:
-            print(f'Skipping {source_name} as it is ugly.')
+            print(f'{source_name} is too complicated so it is being skipped.')
             continue
 
         source_type = 'FR-I' if fri else 'FR-II'  # already removed small
