@@ -1,39 +1,48 @@
 #!/usr/bin/env python3
 
-'''Fit a Gaussian point spread function to a point source and subtract it from
-a source with diffuse emission.'''
+"""Fit a Gaussian point spread function to a point source and subtract it from
+a source with diffuse emission.
+"""
 
-import warnings
-warnings.filterwarnings('ignore')  # supress warnings
-
-import aplpy
 import sys
 import argparse
 import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib_scalebar.scalebar import ScaleBar
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.nddata import Cutout2D
 from astropy.table import Table
 from astropy.wcs import WCS
-from photutils.isophote import build_ellipse_model, Ellipse, EllipseGeometry
 from scipy.ndimage.interpolation import map_coordinates, shift
 import scipy.optimize as opt
 from ds9norm import DS9Normalize
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
-__date__ = '18 June 2019'
+__date__ = '10 October 2019'
 
 
 def get_df(filename, format, index):
-    '''Create the data frame.'''
+    """Get the dataframe.
+
+    Parameters
+    ----------
+    filename : string
+        Name of the file.
+    format : string
+        The format of the file.
+    index : integer
+        The index.
+
+    Returns
+    -------
+    Pandas dataframe
+        Contents of the file.
+    """
     if format == 'csv':
         df = pd.read_csv(filename)
     else:
@@ -44,7 +53,26 @@ def get_df(filename, format, index):
 
 
 def get_position(df, cat_dir):
-    '''Look up the position of the blazar.'''
+    """Look up the position of the blazar.
+
+    Parameters
+    ----------
+    df : Pandas dataframe
+        Name of the file.
+    cat_dir : string
+        Directory of the catalogue.
+
+    Returns
+    -------
+    list
+        Source names.
+    list
+        Positions (RA, declination).
+    list
+        Catalogues.
+    list
+        FITS images.
+    """
     # df = df[df['Field'] == field]  # filters to one field
     blazar_names = df.index.tolist()
     blazar_positions, catalogues, fits_images = [], [], []
@@ -58,25 +86,60 @@ def get_position(df, cat_dir):
 
 def nearest_point_source(df, position, s_code='S', flux_threshold=0.01,
                          distance_threshold=1.5, elongation_threshold=1.2):
-    '''Find the nearest bright point source to a given blazar.'''
-    pd.options.mode.chained_assignment = None  # disable warning, see https://stackoverflow.com/a/20627316/6386612
+    """Find the nearest bright point source to a given blazar.
+
+    Parameters
+    ----------
+    df : Pandas dataframe
+        The data.
+    position : list
+        Position of the source.
+    s_code : string, optional
+        PyBDSF source code to use. The default is 'S'.
+    flux_threshold : float, optional
+        Minimum flux of a source to accept, in Jy per beam to use, when looking
+        for a nearby source. The default is 10 mJy.
+    distance_threshold : float, optional
+        Maximum distance the source can be to the target, in degrees. The
+        default is 1.5.
+    elongation_threshold : float, optional
+        How elongated the point source can be and still accepted. If a source
+        is too long, it may be intrinsic, as the beam is relatively
+        symmetrical. It is given as a ratio betwen the major and minor axes.
+
+    Returns
+    -------
+    float
+        Distance to the target source.
+    list
+        Position (RA, declination) of the point source.
+    """
+    # disable warning, see https://stackoverflow.com/a/20627316/6386612
+    pd.options.mode.chained_assignment = None
     df.reset_index(inplace=True)  # remove Source_id as index column
     df['S_Code'] = df['S_Code'].str.decode('utf-8')  # byte string encoded
-    df_point_sources = df[(df['S_Code'] == s_code) & (df['Total_flux'] > flux_threshold)]
+    df_point_sources = df[(df['S_Code'] == s_code) &
+                          (df['Total_flux'] > flux_threshold)]
     blazar = SkyCoord(position[0], position[1], unit='deg')
     separations, elongations = [], []
-    for ra, dec, major, minor in zip(df_point_sources['RA'], df_point_sources['DEC'], df_point_sources['Maj'], df_point_sources['Min']):
+    for ra, dec, major, minor in zip(df_point_sources['RA'],
+                                     df_point_sources['DEC'],
+                                     df_point_sources['Maj'],
+                                     df_point_sources['Min']):
         point_source = SkyCoord(ra, dec, unit='deg')
         separation = blazar.separation(point_source)
         separations.append(separation.deg)
         elongations.append(major / minor)
     df_point_sources['Separation'] = separations
     df_point_sources['Elongation'] = elongations
-    df_point_sources = df_point_sources[df_point_sources['Elongation'] < elongation_threshold]
+    df_point_sources = df_point_sources[df_point_sources['Elongation'] <
+                                        elongation_threshold]
     nearest = df_point_sources.loc[df_point_sources['Separation'].idxmin()]
     point_source_position = [nearest['RA'], nearest['DEC']]
-    results = {'i': 'ILTJ' + str(nearest['Source_id']), 's': nearest['Separation'], 'f': nearest['Total_flux'] * 1000}
-    print('{i} is {s:.2f} degrees away and has a total flux density of {f:.2f} mJy.'.format(**results))
+    results = {'i': 'ILTJ' + str(nearest['Source_id']),
+               's': nearest['Separation'], 'f': nearest['Total_flux'] * 1000}
+    print('{i} is {s:.2f} degrees away and has a total flux density of ' +
+          '{f:.2f} mJy.'.format(**results))
     if results['s'] > distance_threshold:
         print('The point source is too far away.')
         return False, False
@@ -84,14 +147,44 @@ def nearest_point_source(df, position, s_code='S', flux_threshold=0.01,
 
 
 def get_fits(filename):
-    '''Open FITS image.'''
+    """Open FITS image.
+
+    Parameters
+    ----------
+    filename : string
+        Name of the file.
+
+    Returns
+    -------
+    Astroy object
+        HDU.
+    Astropy object.
+        World coordinate system.
+    """
     hdu = fits.open(filename)[0]
     wcs = WCS(hdu.header, naxis=2)
     return hdu, wcs
 
 
 def get_data(position, hdu, wcs, size=[2, 2] * u.arcmin):
-    '''Cut out the source from the FITS data.'''
+    """Cut out the source from the FITS data.
+
+    Parameters
+    ----------
+    position : list
+        Position of the source, as RA and declination in degrees.
+    hdu : Astropy object
+        The FITS HDU.
+    wcs : Astropy object
+        The FITS world coordinate system.
+    size : list, optional
+        The size of the desired cut out. The default is 2 by 2 arcminutes.
+
+    Returns
+    -------
+    pandas dataframe
+        Contents of the file.
+    """
     sky_position = SkyCoord(position[0], position[1], unit='deg')
     cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size, wcs=wcs)
     data = cutout.data
